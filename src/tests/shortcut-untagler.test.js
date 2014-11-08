@@ -32,7 +32,7 @@ describe('Interface API', function() {
 
 describe('Defaults', function() {
     it('should be able to create a shortcut without specifying a context since it should be added to the main context and main environment', function() {
-        var shortcut = jasmine.createSpy('whatAmI');
+        var shortcut = jasmine.createSpy();
 
         module.createShortcut({
             key: 'e',
@@ -44,11 +44,7 @@ describe('Defaults', function() {
         expect(shortcut).toHaveBeenCalled();
     });
 
-
-    // by default we or environment, that should always default to main context / main environment
-    // by default it should already provide a default context and environment
-    // by default we should provide a context called main
-    // by default we should provide and environment called main
+    // make sure that the shortcut was triggered
 });
 
 describe('Create Context', function() {
