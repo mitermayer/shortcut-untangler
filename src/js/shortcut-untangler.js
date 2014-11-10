@@ -33,54 +33,66 @@
     };
 
     var Shortcut = {
-        validate: function(option) {
-            var required = ['key', 'callback'];
+        validate: function(option, shortcutContext) {
+            if(shortcutContext[option.key]) {
+                throw new Error('Shortcut key "' + option.key + '" is already set on context "' +  shortcutsContext.name + '"');
+            }
 
-            if (!option || !hasRequiredArguments(required, option)) {
+            if (!option || !hasRequiredArguments(['key', 'callback'], option)) {
                 throw new Error('InvalidArguments');
             }
+
+            return true;
         },
         create: function(option) {
             return {
-                "key": option.key,
-                "description": option.description || "Shortcut description",
-                "name": option.name || "Shortcut name",
-                "callback": option.callback
+                'key': option.key,
+                'description': option.description || 'Shortcut description',
+                'name': option.name || 'Shortcut name',
+                'callback': option.callback
             };
         }
     };
 
     var Context = {
-        validate: function(option) {
-            var required = ['name', 'description'];
+        validate: function(option, activeEnvironment) {
+            if(activeEnvironment.context[getContextIndex(activeEnvironment.context, option.name)].name === option.name) {
+                throw new Error('Context name "' + option.name + '" is already set on environment "' +  activeEnvironment.name + '"');
+            }
 
-            if (!option || !hasRequiredArguments(required, option)) {
+            if (!option || !hasRequiredArguments(['name', 'description'], option)) {
                 throw new Error('InvalidArguments');
             }
+
+            return true;
         },
         create: function(option) {
             return {
-                "shortcuts": [],
-                "description": option.description || "Context description",
-                "name": option.name || "Context name",
-                "weight": option.weight || 0
+                'shortcut': [],
+                'description': option.description || 'Context description',
+                'name': option.name || 'Context name',
+                'weight': option.weight || 0
             };
         }
     };
 
     var Environment = {
-        validate: function(option) {
-            var required = ['name', 'description'];
+        validate: function(option, environments) {
+            if(environments[option.name]) {
+                throw new Error('Environment name "' + option.name + '" is already set');
+            }
 
-            if (!option || !hasRequiredArguments(required, option)) {
+            if (!option || !hasRequiredArguments(['name', 'description'], option)) {
                 throw new Error('InvalidArguments');
             }
+
+            return true;
         },
         create: function(option) {
             return {
-                "context": [],
-                "description": option.description || "Environment description",
-                "name": option.name || "Environment name"
+                'context': [],
+                'description': option.description || 'Environment description',
+                'name': option.name || 'Environment name'
             };
         }
     };
@@ -154,29 +166,36 @@
 }, false);
 
         return {
-            changeEnvironment: function() {},
+            changeEnvironment: function(environmentName) {
+                if(_environments[environmentName]) {
+                    active_environment = environmentName;
+                }
+            },
             enableDebug: function(state) {
                 debug = typeof state !== 'undefined' ? state : true;
             },
             createContext: function(option, environment) {
-                Context.validate(option);
+                var activeEnvironment = _environments[this.getActiveEnvironment()];
+
+                // check for unique and required params
+                Context.validate(option, activeEnvironment);
+
+                activeEnvironment.context.push(Context.create(option));
             },
             createEnvironment: function(option) {
-                Environment.validate(option);
+                Environment.validate(option, _environments);
+
+                _environments[option.name] = Environment.create(option);
             },
             createShortcut: function(option, contextName) {
-                Shortcut.validate(option);
-
                 var activeEnvironment = _environments[this.getActiveEnvironment()];
                 var targetContextIndex = getContextIndex(activeEnvironment.context, contextName);
+                var shortcutContext = activeEnvironment.context[targetContextIndex].shortcut;
 
-                var shortcutsContext = activeEnvironment.context[targetContextIndex].shortcut;
+                // check for unique and required params
+                Shortcut.validate(option, shortcutContext);
 
-                if(!shortcutsContext[option.key]) {
-                    shortcutsContext[option.key] = Shortcut.create(option);
-                } else {
-                    throw new Error('Shortcut key "' + option.key + '" is already set on context "' +  shortcutsContext.name + '"');
-                }
+                shortcutContext[option.key] = Shortcut.create(option);
             },
             getActiveEnvironment: function() {
                 return active_environment;

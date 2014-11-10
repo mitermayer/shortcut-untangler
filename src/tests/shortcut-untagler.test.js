@@ -48,6 +48,12 @@ describe('Shortcut Untangler tests', function() {
             var shortcutUntangler = null;
         });
 
+        it('should have a main environment active when initialized', function() {
+            var activeEnvironmentName = shortcutUntangler.getActiveEnvironment();
+
+            expect(activeEnvironmentName).toEqual('main');
+        });
+
         it('should be able to create a shortcut without specifying a context since it should be added to the main context and main environment', function() {
             var shortcut = jasmine.createSpy();
 
@@ -97,6 +103,21 @@ describe('Shortcut Untangler tests', function() {
                 });
             }).not.toThrow();
         });
+
+        it('should throw an exception when trying to create a context with a name that already exists', function() {
+
+            shortcutUntangler.createContext({
+                name: 'lorem',
+                description: 'lorem ipsum'
+            });
+
+            expect(function() {
+                shortcutUntangler.createContext({
+                    name: 'lorem',
+                    description: 'lorem ipsum'
+                });
+            }).toThrow();
+        });
     });
 
     describe('Create Environment', function() {
@@ -107,8 +128,7 @@ describe('Shortcut Untangler tests', function() {
         it('should throw an exception when creating environment without a name', function() {
             expect(function() {
                 shortcutUntangler.createEnvironment({
-                    description: 'lorem ipsum',
-                    context: []
+                    description: 'lorem ipsum'
                 });
             }).toThrow();
         });
@@ -116,10 +136,44 @@ describe('Shortcut Untangler tests', function() {
         it('should throw an exception when creating environment without a description', function() {
             expect(function() {
                 shortcutUntangler.createEnvironment({
-                    name: 'foo',
-                    context: []
+                    name: 'foo'
                 });
             }).toThrow();
+        });
+
+        it('should not throw an exception when creating environment with name and description', function() {
+            expect(function() {
+                shortcutUntangler.createEnvironment({
+                    name: 'lorem',
+                    description: 'lorem ipsum'
+                });
+            }).not.toThrow();
+        });
+
+        it('should throw an exception when trying to create an environment with a name that already exists', function() {
+
+            shortcutUntangler.createEnvironment({
+                name: 'lorem',
+                description: 'lorem ipsum'
+            });
+
+            expect(function() {
+                shortcutUntangler.createEnvironment({
+                    name: 'lorem',
+                    description: 'lorem ipsum'
+                });
+            }).toThrow();
+        });
+
+        it('should have active environment name set to "lorem" when creating a new environment and updating to it', function() {
+            shortcutUntangler.createEnvironment({
+                name: 'lorem',
+                description: 'lorem ipsum'
+            });
+
+            shortcutUntangler.changeEnvironment('lorem');
+
+            expect(shortcutUntangler.getActiveEnvironment()).toBe('lorem');
         });
     });
 
@@ -168,7 +222,6 @@ describe('Shortcut Untangler tests', function() {
             }).toThrow();
         });
 
-
         it('should add a shortcut to the flattened json representation of the current active environment', function() {
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
@@ -187,12 +240,12 @@ describe('Shortcut Untangler tests', function() {
 });
 
 function triggerNativeKeyHotkey(keyCode, el) {
-    var eventObj = document.createEventObject ?  document.createEventObject() : document.createEvent("Events");
+    var eventObj = document.createEventObject ?  document.createEventObject() : document.createEvent('Events');
 
     el = el || document.getElementsByTagName('body')[0];
 
     if(eventObj.initEvent){
-      eventObj.initEvent("keypress", true, true);
+      eventObj.initEvent('keypress', true, true);
     }
 
     keyCode = keyCode.charCodeAt(0);
@@ -200,5 +253,5 @@ function triggerNativeKeyHotkey(keyCode, el) {
     eventObj.keyCode = keyCode;
     eventObj.which = keyCode;
 
-    el.dispatchEvent ? el.dispatchEvent(eventObj) : el.fireEvent("onkeydown", eventObj);
+    el.dispatchEvent ? el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
 }
