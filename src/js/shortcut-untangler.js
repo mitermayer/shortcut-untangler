@@ -6,78 +6,147 @@
     }
 }(this, function() {
 
-    //var extend = typeof jQuery !== 'undefined' ? jQuery.extend : function(out) {
-    //    out = out || {};
-    //    for (var i = 1; i < arguments.length; i++) {
-    //        if (!arguments[i])
-    //            continue;
-
-    //        for (var key in arguments[i]) {
-    //            if (arguments[i].hasOwnProperty(key))
-    //                out[key] = arguments[i][key];
-    //        }
-    //    }
-
-    //    return out;
-    //};
-
-    // primayKey: key
-    var Shortcut = function(options) {
-        this.key = options.key;
-        this.description = options.description;
-        this.name = options.name;
-        this.callback = options.callback;
-    };
-
-    // primayKey: name
-    var Context = function(options) {
-        this.description = options.description;
-        this.name = options.name;
-        this.shortcuts = [];
-        this.weight = options.weight;
-    };
-
-    // primayKey: name
-    var Environment = function(options) {
-        this.active = false;
-        this.context = [];
-        this.description = options.description;
-        this.name = options.name;
-    };
-
-    var _environments = {
-        'main': {
-            'active': true,
-            'description': 'Default shortcuts environment',
-            'name': 'main',
-            'context': [{
-                'description': 'Default shortcuts context',
-                'name': 'main',
-                'weight': 0,
-                'shortcut': {}
-            }]
-        }
-    };
-
     var hasRequiredArguments = function(required, option) {
         return required.every(function(key) {
             return typeof option[key] !== 'undefined';
         });
     };
 
-    var ShortcutUntanglerFactory = function() {
-        var default_active_envirionment = "main";
+    var printDebugConsoleMessage = function(shortcut) {
+            console.log('Shortcut "' + shortcut.name + '" triggered with key "' + shortcut.key + '"', shortcut);
+    };
 
-        document.getElementsByTagName("body")[0].addEventListener("keypress", function(e) {
+    var getContextIndex = function(contextArr, contextName) {
+        var targetContextIndex = 0; // defaults to main
+        var _context;
+
+        for( var i=0, len=contextArr.length; i<len; i++) {
+            _context = contextArr[i];
+
+            if(_context.name === contextName){
+                targetContextIndex = i;
+                break;
+            }
+        }
+
+        return targetContextIndex;
+    };
+
+    var Shortcut = {
+        validate: function(option) {
+            var required = ['key', 'callback'];
+
+            if (!option || !hasRequiredArguments(required, option)) {
+                throw new Error('InvalidArguments');
+            }
+        },
+        create: function(option) {
+            return {
+                "key": option.key,
+                "description": option.description || "Shortcut description",
+                "name": option.name || "Shortcut name",
+                "callback": option.callback
+            };
+        }
+    };
+
+    var Context = {
+        validate: function(option) {
+            var required = ['name', 'description'];
+
+            if (!option || !hasRequiredArguments(required, option)) {
+                throw new Error('InvalidArguments');
+            }
+        },
+        create: function(option) {
+            return {
+                "shortcuts": [],
+                "description": option.description || "Context description",
+                "name": option.name || "Context name",
+                "weight": option.weight || 0
+            };
+        }
+    };
+
+    var Environment = {
+        validate: function(option) {
+            var required = ['name', 'description'];
+
+            if (!option || !hasRequiredArguments(required, option)) {
+                throw new Error('InvalidArguments');
+            }
+        },
+        create: function(option) {
+            return {
+                "context": [],
+                "description": option.description || "Environment description",
+                "name": option.name || "Environment name"
+            };
+        }
+    };
+
+
+    // returns a flattened object with the shortcuts of the current active environment on the format
+    // 'x' { // shortcut key
+        // name: 'foo',
+        // decription: 'foo bar'
+    // }
+    var flattenActiveEnvironment = function(env) {
+        var flattenedEnv = {};
+
+        for (var i = env.context.length - 1; i >= 0; i--) {
+            var _context = env.context[i].shortcut;
+            var _shotcut;
+
+            for (_shortcut in _context) {
+                var shortcutInfo = _context[_shortcut];
+
+                if(flattenedEnv[_shortcut]) { // we want to preserve weight algorithm, so if a shortcut has already been set we should not add to the env
+                    continue;
+                }
+
+                flattenedEnv[_shortcut] = {
+                    'name': shortcutInfo.name,
+                    'description': shortcutInfo.description
+                };
+            }
+        }
+
+        return flattenedEnv;
+    };
+
+    var ShortcutUntangler = function() {
+        var active_environment = 'main';
+        var debug = false;
+        var _environments = {
+            // TODO: should move this to somewhere else or maybe make this generated by a javasript function somehow
+            'main': {
+                'active': true,
+                'description': 'Default shortcuts environment',
+                'name': 'main',
+                'context': [{
+                    'description': 'Default shortcuts context',
+                    'name': 'main',
+                    'weight': 0,
+                    'shortcut': {}
+                }]
+            }
+        };
+
+        document.getElementsByTagName('body')[0].addEventListener('keypress', function(e) {
             var key = e.keyCode ? e.keyCode : e.which;
             var shortcut = String.fromCharCode(key);
-
-            var activeEnvironment = _environments[default_active_envirionment];
+            var activeEnvironment = _environments[active_environment];
 
             // loop in all context backwards searching for the key
-            for (var i = activeEnvironment.context.length; i > 0; --i) {
-                var _shortcut = activeEnvironment.context[i -1].shortcut[shortcut];
+            for (var i = activeEnvironment.context.length - 1; i >= 0; i--) {
+                var _shortcut = activeEnvironment.context[i].shortcut[shortcut];
+
                 if(_shortcut)  {
+                    if(debug) {
+                        printDebugConsoleMessage(_shortcut);
+                    }
+
                     _shortcut.callback(arguments);
                     break;
                 }
@@ -86,36 +155,38 @@
 
         return {
             changeEnvironment: function() {},
-            enableDebug: function() {},
-            getActiveEnvironment: function() {},
-            createContext: function(option) {
-                var required = ['name', 'description'];
-
-                if (!option || !hasRequiredArguments(required, option)) {
-                    throw new Error("InvalidArguments");
-                }
+            enableDebug: function(state) {
+                debug = typeof state !== 'undefined' ? state : true;
+            },
+            createContext: function(option, environment) {
+                Context.validate(option);
             },
             createEnvironment: function(option) {
-                var required = ['name', 'description'];
+                Environment.validate(option);
+            },
+            createShortcut: function(option, contextName) {
+                Shortcut.validate(option);
 
-                if (!option || !hasRequiredArguments(required, option)) {
-                    throw new Error("InvalidArguments");
+                var activeEnvironment = _environments[this.getActiveEnvironment()];
+                var targetContextIndex = getContextIndex(activeEnvironment.context, contextName);
+
+                var shortcutsContext = activeEnvironment.context[targetContextIndex].shortcut;
+
+                if(!shortcutsContext[option.key]) {
+                    shortcutsContext[option.key] = Shortcut.create(option);
+                } else {
+                    throw new Error('Shortcut key "' + option.key + '" is already set on context "' +  shortcutsContext.name + '"');
                 }
             },
-            createShortcut: function(option) {
-                var required = ['key', 'callback'];
-
-                if (!option || !hasRequiredArguments(required, option)) {
-                    throw new Error("InvalidArguments");
-                }
-
-                _environments.main.context[0].shortcut[option.key] = option;
+            getActiveEnvironment: function() {
+                return active_environment;
             },
-            toJSON: function() {}
+            toJSON: function(){
+                return flattenActiveEnvironment(_environments[active_environment]);
+            }
         };
     };
 
-    // todo ShortcutUntanglerFactory should be initialized
-
-    return new ShortcutUntanglerFactory();
+    // todo ShortcutUntangler should be initialized
+    return ShortcutUntangler;
 }));
