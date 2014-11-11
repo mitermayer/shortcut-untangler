@@ -6,6 +6,8 @@
     }
 }(this, function() {
 
+    "user scrict";
+
     var hasRequiredArguments = function(required, option) {
         return required.every(function(key) {
             return typeof option[key] !== 'undefined';
@@ -23,8 +25,11 @@
         for( var i=0, len=contextArr.length; i<len; i++) {
             _curContext = contextArr[i];
 
-            if(newContextWeight <= _curContext.weight) {
+            if(newContextWeight < _curContext.weight) {
                 placementIndex = i;
+                break;
+            } else if(newContextWeight === _curContext.weight) {
+                placementIndex = i+1;
                 break;
             }
         }
@@ -194,7 +199,6 @@
                 var activeEnvironment = _environments[this.getActiveEnvironment()];
                 var newContext;
                 var contextArr;
-
                 // check for unique and required params
                 Context.validate(option, activeEnvironment);
 
@@ -221,7 +225,7 @@
             getActiveEnvironment: function() {
                 return active_environment;
             },
-            toJSON: function(){
+            toJSON: function() {
                 return flattenActiveEnvironment(_environments[active_environment]);
             }
         };

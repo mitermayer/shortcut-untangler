@@ -31,7 +31,7 @@ describe('Shortcut Untangler tests', function() {
         });
 
         it('should provide a method for retriving the active environment', function() {
-            expect(typeof shortcutUntangler.toJSON).toBe('function');
+            expect(typeof shortcutUntangler.getActiveEnvironment).toBe('function');
         });
 
         it('should provide a method for adding context to an existing environment', function() {
@@ -39,15 +39,32 @@ describe('Shortcut Untangler tests', function() {
         });
     });
 
-    describe('Initialization', function() {
+    describe('Debug support', function() {
         beforeEach(function() {
-            var shortcutUntangler = ShortcutUntangler();
+            shortcutUntangler = ShortcutUntangler();
+            shortcutUntangler.enableDebug();
         });
 
         afterEach(function() {
-            var shortcutUntangler = null;
+            shortcutUntangler.enableDebug(false);
+            shortcutUntangler = null;
         });
 
+        it('should call "console.log" when debug is enabled', function() {
+            spyOn(console, 'log');
+
+            shortcutUntangler.createShortcut({
+                key: 'e',
+                callback: function(){}
+            });
+
+            triggerNativeKeyHotkey('e');
+
+            expect(console.log).toHaveBeenCalled();
+        });
+    });
+
+    describe('Initialization', function() {
         it('should have a main environment active when initialized', function() {
             var activeEnvironmentName = shortcutUntangler.getActiveEnvironment();
 
@@ -139,14 +156,14 @@ describe('Shortcut Untangler tests', function() {
                 description: 'My shortcut description',
                 key: 'e',
                 callback: function(){}
-            }, "lorem");
+            }, 'lorem');
 
             shortcutUntangler.createShortcut({
                 name: 'bar',
                 description: 'My shortcut description',
                 key: 'e',
                 callback: shortcut
-            }, "ipsum");
+            }, 'ipsum');
 
             shortcutUntangler.createShortcut({
                 name: 'three',
@@ -216,6 +233,12 @@ describe('Shortcut Untangler tests', function() {
 
             expect(shortcutUntangler.getActiveEnvironment()).toBe('lorem');
         });
+
+        it('should have active environment name set to "main" when trying to change environment to a non existent one', function() {
+            shortcutUntangler.changeEnvironment('lorem');
+
+            expect(shortcutUntangler.getActiveEnvironment()).toBe('main');
+        });
     });
 
     describe('Create Shortcut', function() {
@@ -273,9 +296,85 @@ describe('Shortcut Untangler tests', function() {
 
             var environmentJson = shortcutUntangler.toJSON();
 
-            triggerNativeKeyHotkey('e');
-
             expect(environmentJson['e'].name).toEqual('My shortcut');
+        });
+
+        it('should a shortcut has the same key bindings on a particular environment the one with higher weight should be represented on the flattened json representation of the current active environment', function() {
+            shortcutUntangler.createContext({
+                name: 'ipsum',
+                description: 'lorem ipsum',
+                weight: 2
+            });
+
+            shortcutUntangler.createContext({
+                name: 'lorem',
+                description: 'lorem ipsum',
+                weight: 1
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'foo',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: function(){}
+            }, 'lorem');
+
+            shortcutUntangler.createShortcut({
+                name: 'bar',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: function(){}
+            }, 'ipsum');
+
+            shortcutUntangler.createShortcut({
+                name: 'three',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: function(){}
+            });
+
+            var environmentJson = shortcutUntangler.toJSON();
+
+            expect(environmentJson['e'].name).toEqual('bar');
+        });
+
+        it('should a shortcut has the same key bindings on a particular environment and the context has the same weight the one that the context was added last should be represented on the flattened json representation of the current active environment', function() {
+            shortcutUntangler.createContext({
+                name: 'ipsum',
+                description: 'lorem ipsum',
+                weight: 2
+            });
+
+            shortcutUntangler.createContext({
+                name: 'lorem',
+                description: 'lorem ipsum',
+                weight: 2
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'foo',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: function(){}
+            }, 'lorem');
+
+            shortcutUntangler.createShortcut({
+                name: 'bar',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: function(){}
+            }, 'ipsum');
+
+            shortcutUntangler.createShortcut({
+                name: 'three',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: function(){}
+            });
+
+            var environmentJson = shortcutUntangler.toJSON();
+
+            expect(environmentJson['e'].name).toEqual('foo');
         });
     });
 });
