@@ -118,6 +118,47 @@ describe('Shortcut Untangler tests', function() {
                 });
             }).toThrow();
         });
+
+        it('should add context to the context array after the the first item of lower weight', function() {
+            var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createContext({
+                name: 'ipsum',
+                description: 'lorem ipsum',
+                weight: 2
+            });
+
+            shortcutUntangler.createContext({
+                name: 'lorem',
+                description: 'lorem ipsum',
+                weight: 1
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'foo',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: function(){}
+            }, "lorem");
+
+            shortcutUntangler.createShortcut({
+                name: 'bar',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            }, "ipsum");
+
+            shortcutUntangler.createShortcut({
+                name: 'three',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: function(){}
+            });
+
+            triggerNativeKeyHotkey('e');
+
+            expect(shortcut).toHaveBeenCalled();
+        });
     });
 
     describe('Create Environment', function() {

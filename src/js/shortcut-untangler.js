@@ -16,6 +16,22 @@
             console.log('Shortcut "' + shortcut.name + '" triggered with key "' + shortcut.key + '"', shortcut);
     };
 
+    var getContextPlacementIndex = function(contextArr, newContext) {
+        var placementIndex = contextArr.length; // defaults to add push it to the end
+        var newContextWeight = newContext.weight;
+
+        for( var i=0, len=contextArr.length; i<len; i++) {
+            _curContext = contextArr[i];
+
+            if(newContextWeight <= _curContext.weight) {
+                placementIndex = i;
+                break;
+            }
+        }
+
+        return placementIndex;
+    };
+
     var getContextIndex = function(contextArr, contextName) {
         var targetContextIndex = 0; // defaults to main
         var _context;
@@ -163,7 +179,7 @@
                     break;
                 }
             }
-}, false);
+        }, false);
 
         return {
             changeEnvironment: function(environmentName) {
@@ -176,11 +192,16 @@
             },
             createContext: function(option, environment) {
                 var activeEnvironment = _environments[this.getActiveEnvironment()];
+                var newContext;
+                var contextArr;
 
                 // check for unique and required params
                 Context.validate(option, activeEnvironment);
 
-                activeEnvironment.context.push(Context.create(option));
+                contextArr = activeEnvironment.context;
+                newContext = Context.create(option);
+
+                contextArr.splice(getContextPlacementIndex(contextArr, newContext), 0, newContext);
             },
             createEnvironment: function(option) {
                 Environment.validate(option, _environments);
