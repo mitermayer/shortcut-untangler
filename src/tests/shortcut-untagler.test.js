@@ -2,7 +2,7 @@ describe('Shortcut Untangler tests', function() {
     var shortcutUntangler;
 
     beforeEach(function() {
-        shortcutUntangler = ShortcutUntangler();
+        shortcutUntangler = new ShortcutUntangler();
     });
 
     afterEach(function() {
@@ -33,15 +33,11 @@ describe('Shortcut Untangler tests', function() {
         it('should provide a method for retriving the active environment', function() {
             expect(typeof shortcutUntangler.getActiveEnvironment).toBe('function');
         });
-
-        it('should provide a method for adding context to an existing environment', function() {
-            expect(typeof shortcutUntangler.toJSON).toBe('function');
-        });
     });
 
     describe('Debug support', function() {
         beforeEach(function() {
-            shortcutUntangler = ShortcutUntangler();
+            shortcutUntangler = new ShortcutUntangler();
             shortcutUntangler.enableDebug();
         });
 
@@ -89,9 +85,83 @@ describe('Shortcut Untangler tests', function() {
 
             expect(environmentJson).toEqual({});
         });
+
+        it('should return a list of flattened environments when passing a list of environment', function() {
+
+            shortcutUntangler.createEnvironment({
+                name: 'other',
+                description: 'bar'
+            });
+
+            shortcutUntangler.changeEnvironment('other');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut1',
+                key: 'f',
+                callback: function(){}
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'foo',
+                description: 'bar'
+            });
+
+            shortcutUntangler.changeEnvironment('foo');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut2',
+                key: 'f',
+                callback: function(){}
+            });
+
+            var environmentJson = shortcutUntangler.toJSON(['other', 'foo']);
+
+            expect(environmentJson[0]['f'].name).toBe('shortcut1');
+            expect(environmentJson[1]['f'].name).toBe('shortcut2');
+        });
+
+        it('should return list with all flattened environments when passing "true" as param', function() {
+            shortcutUntangler.createShortcut({
+                name: 'shortcut0',
+                key: 'f',
+                callback: function(){}
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'other',
+                description: 'bar'
+            }, false);
+
+            shortcutUntangler.changeEnvironment('other');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut1',
+                key: 'f',
+                callback: function(){}
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'foo',
+                description: 'bar'
+            }, false);
+
+            shortcutUntangler.changeEnvironment('foo');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut2',
+                key: 'f',
+                callback: function(){}
+            });
+
+            var environmentJson = shortcutUntangler.toJSON(true);
+
+            expect(environmentJson[0]['f'].name).toBe('shortcut0');
+            expect(environmentJson[1]['f'].name).toBe('shortcut1');
+            expect(environmentJson[2]['f'].name).toBe('shortcut2');
+        });
     });
 
-    describe('Create Context', function() {
+    describe('Context', function() {
         it('should throw an exception when creating context without arguments', function() {
             expect(shortcutUntangler.createContext).toThrow();
         });
@@ -178,7 +248,7 @@ describe('Shortcut Untangler tests', function() {
         });
     });
 
-    describe('Create Environment', function() {
+    describe('Environment', function() {
         it('should throw an exception when creating environment without arguments', function() {
             expect(shortcutUntangler.createEnvironment).toThrow();
         });
@@ -209,7 +279,6 @@ describe('Shortcut Untangler tests', function() {
         });
 
         it('should throw an exception when trying to create an environment with a name that already exists', function() {
-
             shortcutUntangler.createEnvironment({
                 name: 'lorem',
                 description: 'lorem ipsum'
@@ -239,9 +308,70 @@ describe('Shortcut Untangler tests', function() {
 
             expect(shortcutUntangler.getActiveEnvironment()).toBe('main');
         });
+
+        it('should add all active shortcuts of the main environment to the new main context of the new environment', function() {
+            shortcutUntangler.createShortcut({
+                name: 'bar',
+                key: 'e',
+                callback: function(){}
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'lorem',
+                description: 'lorem ipsum'
+            });
+
+            shortcutUntangler.changeEnvironment('lorem');
+
+            expect(shortcutUntangler.toJSON()['e'].name).toEqual('bar');
+        });
+
+        it('should allow new environment to be created based on another environment', function() {
+            shortcutUntangler.createEnvironment({
+                name: 'lorem',
+                description: 'lorem ipsum'
+            });
+
+            // create a new shortcut for the environment lorem
+            shortcutUntangler.changeEnvironment('lorem');
+            shortcutUntangler.createShortcut({
+                name: 'bar',
+                key: 'e',
+                callback: function(){}
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'bar',
+                description: 'lorem ipsum'
+            }, 'lorem');
+
+            expect(shortcutUntangler.toJSON('bar')['e'].name).toEqual('bar');
+        });
+
+        it('should allow new environment to be created bare without being based on another environment', function() {
+            shortcutUntangler.createEnvironment({
+                name: 'lorem',
+                description: 'lorem ipsum'
+            });
+
+            // create a new shortcut for the environment lorem
+            shortcutUntangler.changeEnvironment('lorem');
+            shortcutUntangler.createShortcut({
+                name: 'bar',
+                key: 'e',
+                callback: function(){}
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'bar',
+                description: 'lorem ipsum'
+            }, false);
+
+            expect(shortcutUntangler.toJSON('bar')).toEqual({});
+        });
     });
 
-    describe('Create Shortcut', function() {
+    describe('Shortcut', function() {
         it('should throw an exception when creating shortcut without arguments', function() {
             expect(shortcutUntangler.createShortcut).toThrow();
         });
@@ -271,8 +401,7 @@ describe('Shortcut Untangler tests', function() {
             }).not.toThrow();
         });
 
-        it('should throw an exception when trying to create a shortcut with an already existent key', function() {
-
+        it('should throw an exception when trying to create a shortcut with an already existent key on the same context', function() {
             shortcutUntangler.createShortcut({
                 key: 'e',
                 callback: function(){}
