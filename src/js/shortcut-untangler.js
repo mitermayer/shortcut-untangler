@@ -212,7 +212,7 @@
             var ret = {};
 
             if(typeof match === 'string') { // particular env
-                ret = flattenActiveEnvironment(_environments[match]);
+                ret = typeof _environments[match] !== 'undefined' ? flattenActiveEnvironment(_environments[match]) : ret;
             } else if( Array.isArray(match) ) { // we have a list of envs
                 ret = [];
 

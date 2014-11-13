@@ -369,6 +369,28 @@ describe('Shortcut Untangler tests', function() {
 
             expect(shortcutUntangler.toJSON('bar')).toEqual({});
         });
+
+        it('should create a bare environment when a non existent context to base the environment from', function() {
+            shortcutUntangler.createEnvironment({
+                name: 'lorem',
+                description: 'lorem ipsum'
+            });
+
+            // create a new shortcut for the environment lorem
+            shortcutUntangler.changeEnvironment('lorem');
+            shortcutUntangler.createShortcut({
+                name: 'bar',
+                key: 'e',
+                callback: function(){}
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'bar',
+                description: 'lorem ipsum'
+            }, "nonexistent");
+
+            expect(shortcutUntangler.toJSON('bar')).toEqual({});
+        });
     });
 
     describe('Shortcut', function() {
