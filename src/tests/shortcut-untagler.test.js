@@ -11,7 +11,7 @@ describe('Shortcut Untangler tests', function() {
 
     describe('Interface API', function() {
         it('should provide a method for enable debug mode', function() {
-            expect(typeof shortcutUntangler.enableDebug).toBe('function');
+            expect(typeof shortcutUntangler.debugMode).toBe('function');
         });
 
         it('should provide a method for change environment', function() {
@@ -33,16 +33,24 @@ describe('Shortcut Untangler tests', function() {
         it('should provide a method for retriving the active environment', function() {
             expect(typeof shortcutUntangler.getActiveEnvironment).toBe('function');
         });
+
+        it('should provide a method for toggle enabling state', function() {
+            expect(typeof shortcutUntangler.debugMode).toBe('function');
+        });
+
+        it('should provide a method for enabling debug modet', function() {
+            expect(typeof shortcutUntangler.debugMode).toBe('function');
+        });
     });
 
     describe('Debug support', function() {
         beforeEach(function() {
             shortcutUntangler = new ShortcutUntangler();
-            shortcutUntangler.enableDebug();
+            shortcutUntangler.debugMode();
         });
 
         afterEach(function() {
-            shortcutUntangler.enableDebug(false);
+            shortcutUntangler.debugMode(false);
             shortcutUntangler = null;
         });
 
@@ -526,6 +534,448 @@ describe('Shortcut Untangler tests', function() {
             var environmentJson = shortcutUntangler.toJSON();
 
             expect(environmentJson['e'].name).toEqual('foo');
+        });
+    });
+
+    describe('Controls', function() {
+        it('should not trigger a shortcut in any environment when calling toggleDisabledState with no arguments', function() { var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'other',
+                description: 'bar'
+            }, false);
+
+            shortcutUntangler.changeEnvironment('other');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut1',
+                key: 'e',
+                callback: shortcut
+            });
+
+            shortcutUntangler.toggleDisabledState();
+
+            triggerNativeKeyHotkey('e');
+
+            shortcutUntangler.changeEnvironment('main');
+
+            triggerNativeKeyHotkey('e');
+
+            expect(shortcut).not.toHaveBeenCalled();
+        });
+
+        it('should not disable any environment when calling toggleDisabledState with an invalid "environment param', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'foo',
+                description: 'bar'
+            }, false);
+
+            shortcutUntangler.changeEnvironment('foo');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut2',
+                key: 'e',
+                callback: shortcut2
+            });
+
+            shortcutUntangler.toggleDisabledState(true, 'invalid');
+
+            triggerNativeKeyHotkey('e');
+
+            shortcutUntangler.changeEnvironment('main');
+
+            triggerNativeKeyHotkey('e');
+
+            expect(shortcut).toHaveBeenCalled();
+            expect(shortcut2).toHaveBeenCalled();
+        });
+
+        it('should just disable the shortcuts in "foo" and "bar" when calling toggleDisabledState with ["foo", "bar"] as an environment param', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+            var shortcut3 = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'foo',
+                description: 'bar'
+            }, false);
+
+            shortcutUntangler.changeEnvironment('foo');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut2',
+                key: 'e',
+                callback: shortcut2
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'bar',
+                description: 'lorem ipsum'
+            }, false);
+
+            shortcutUntangler.changeEnvironment('bar');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut3',
+                key: 'e',
+                callback: shortcut3
+            });
+
+            shortcutUntangler.toggleDisabledState(true, ['foo', 'bar']);
+
+            triggerNativeKeyHotkey('e');
+
+            shortcutUntangler.changeEnvironment('foo');
+
+            triggerNativeKeyHotkey('e');
+
+            shortcutUntangler.changeEnvironment('main');
+
+            triggerNativeKeyHotkey('e');
+
+            expect(shortcut).toHaveBeenCalled();
+            expect(shortcut2).not.toHaveBeenCalled();
+            expect(shortcut3).not.toHaveBeenCalled();
+        });
+
+        it('should not disable the shortcuts on any environment if calling toggleDisabledState with invalid ["invalid", "invalid2"] names as environment param', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+            var shortcut3 = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'foo',
+                description: 'bar'
+            }, false);
+
+            shortcutUntangler.changeEnvironment('foo');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut2',
+                key: 'e',
+                callback: shortcut2
+            });
+
+            shortcutUntangler.createEnvironment({
+                name: 'bar',
+                description: 'lorem ipsum'
+            }, false);
+
+            shortcutUntangler.changeEnvironment('bar');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut3',
+                key: 'e',
+                callback: shortcut3
+            });
+
+            shortcutUntangler.toggleDisabledState(true, ['invalid1', 'invalid2']);
+
+            triggerNativeKeyHotkey('e');
+
+            shortcutUntangler.changeEnvironment('foo');
+
+            triggerNativeKeyHotkey('e');
+
+            shortcutUntangler.changeEnvironment('main');
+
+            triggerNativeKeyHotkey('e');
+
+            expect(shortcut).toHaveBeenCalled();
+            expect(shortcut2).toHaveBeenCalled();
+            expect(shortcut3).toHaveBeenCalled();
+        });
+
+        it('should disabled context instead of the whole environments when passing a context name as a param', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            });
+
+            shortcutUntangler.createContext({
+                name: 'other',
+                description: 'lorem ipsum',
+                weight: 1
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut2
+            }, 'other');
+
+            shortcutUntangler.toggleDisabledState(true, 'main', 'other');
+
+            triggerNativeKeyHotkey('e');
+
+            expect(shortcut2).not.toHaveBeenCalled();
+            expect(shortcut).toHaveBeenCalled();
+        });
+
+        it('should not disabled context any context when passing an invalid context name as a param', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            });
+
+            shortcutUntangler.createContext({
+                name: 'other',
+                description: 'lorem ipsum',
+                weight: 1
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut2
+            }, 'other');
+
+            shortcutUntangler.toggleDisabledState(true, 'main', 'invalid');
+
+            triggerNativeKeyHotkey('e');
+
+            expect(shortcut2).toHaveBeenCalled();
+            expect(shortcut).not.toHaveBeenCalled();
+        });
+
+        it('should disabled context in list instead of the whole environments when passing a context name as a param', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+            var shortcut3 = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            });
+
+            shortcutUntangler.createContext({
+                name: 'other',
+                description: 'lorem ipsum',
+                weight: 1
+            });
+
+            shortcutUntangler.createContext({
+                name: 'foo',
+                description: 'lorem ipsum',
+                weight: 2
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut2',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut2
+            }, 'other');
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut3',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut2
+            }, 'foo');
+
+            shortcutUntangler.toggleDisabledState(true, 'main', ['other', 'foo']);
+
+            triggerNativeKeyHotkey('e');
+
+            expect(shortcut3).not.toHaveBeenCalled();
+            expect(shortcut2).not.toHaveBeenCalled();
+            expect(shortcut).toHaveBeenCalled();
+        });
+
+        it('should be able to disable a single shortcut from a context', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+
+            shortcutUntangler.createContext({
+                name: 'other',
+                description: 'lorem ipsum',
+                weight: 1
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            }, 'other');
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut 2',
+                description: 'My shortcut description',
+                key: 'f',
+                callback: shortcut2
+            }, 'other');
+
+            shortcutUntangler.toggleDisabledState(true, 'main', 'other', 'e');
+
+            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('f');
+
+            expect(shortcut).not.toHaveBeenCalled();
+            expect(shortcut2).toHaveBeenCalled();
+        });
+
+        it('should not disable any shortcut from a context when passing an invalid shorcut key', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+
+            shortcutUntangler.createContext({
+                name: 'other',
+                description: 'lorem ipsum',
+                weight: 1
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            }, 'other');
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut 2',
+                description: 'My shortcut description',
+                key: 'f',
+                callback: shortcut2
+            }, 'other');
+
+            shortcutUntangler.toggleDisabledState(true, 'main', 'other', 'invalid');
+
+            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('f');
+
+            expect(shortcut).toHaveBeenCalled();
+            expect(shortcut2).toHaveBeenCalled();
+        });
+
+        it('should not disable any shortcut from a context when passing an invalid list of shorcut keys', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+
+            shortcutUntangler.createContext({
+                name: 'other',
+                description: 'lorem ipsum',
+                weight: 1
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            }, 'other');
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut 2',
+                description: 'My shortcut description',
+                key: 'f',
+                callback: shortcut2
+            }, 'other');
+
+            shortcutUntangler.toggleDisabledState(true, 'main', 'other', ['invalid1', 'invalid2']);
+
+            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('f');
+
+            expect(shortcut).toHaveBeenCalled();
+            expect(shortcut2).toHaveBeenCalled();
+        });
+
+        it('should be able to disable a list of shortcuts from a context', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+
+            shortcutUntangler.createContext({
+                name: 'other',
+                description: 'lorem ipsum',
+                weight: 1
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            }, 'other');
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut 2',
+                description: 'My shortcut description',
+                key: 'f',
+                callback: shortcut2
+            }, 'other');
+
+            shortcutUntangler.toggleDisabledState(true, 'main', 'other', ['e', 'f']);
+
+            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('f');
+
+            expect(shortcut).not.toHaveBeenCalled();
+            expect(shortcut2).not.toHaveBeenCalled();
+        });
+
+        it('should toggle disabled state when calling it again with no state as param', function() {
+            var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            });
+
+            shortcutUntangler.toggleDisabledState();
+            shortcutUntangler.toggleDisabledState();
+
+            triggerNativeKeyHotkey('e');
+
+            expect(shortcut).toHaveBeenCalled();
         });
     });
 });

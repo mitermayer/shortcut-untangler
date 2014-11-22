@@ -6,7 +6,15 @@
     }
 }(this, function() {
 
-    "user scrict";
+    'use scrict';
+
+    var isString = function(match) {
+        return typeof match === 'string';
+    };
+
+    var isArray = function(match) {
+        return Array.isArray(match);
+    };
 
     var hasRequiredArguments = function(required, option) {
         return required.every(function(key) {
@@ -66,12 +74,29 @@
             return true;
         },
         create: function(option) {
-            return {
+            var shortcut = {
                 'key': option.key,
                 'description': option.description || 'Shortcut description',
                 'name': option.name || 'Shortcut name',
                 'callback': option.callback
             };
+
+            Object.defineProperty(shortcut, 'toggleDisabledState', {
+                    value : function(state) {
+                        state = typeof state !== 'undefined' ? state : !this.disabled;
+
+                        if(state) {
+                            this.disabled = true;
+                        } else {
+                            delete this.disabled;
+                        }
+                    },
+                    writable: false,
+                    enumerable: false,
+                    configurable: false
+            });
+
+            return shortcut;
         }
     };
 
@@ -90,12 +115,43 @@
             return true;
         },
         create: function(option) {
-            return {
+            var context = {
                 'shortcut': {},
                 'description': option.description || 'Context description',
                 'name': option.name || 'Context name',
                 'weight': option.weight || 0
             };
+
+            Object.defineProperty(context, 'toggleDisabledState', {
+                    value : function(state, shortcut) {
+                        var scut;
+
+                        if (isArray(shortcut)) { // disable context in array
+                            for(var i=0, len=shortcut.length; i<len; i++) {
+                                scut = this.shortcut[shortcut[i]];
+
+                                if(typeof scut !== 'undefined') {
+                                    scut.toggleDisabledState(state);
+                                }
+                            }
+                        } else if(isString(shortcut)) { // disable a single context
+                            scut = this.shortcut[shortcut];
+
+                            if(typeof scut !== 'undefined') {
+                                scut.toggleDisabledState(state);
+                            }
+                        } else { // disable all shortcuts
+                            for(var shortcutKey in this.shortcut) {
+                                this.shortcut[shortcutKey].toggleDisabledState(state);
+                            }
+                        }
+                    },
+                    writable: false,
+                    enumerable: false,
+                    configurable: false
+            });
+
+            return context;
         }
     };
 
@@ -112,15 +168,49 @@
             return true;
         },
         create: function(option) {
-            return {
+            var environment = {
                 'context': [],
                 'description': option.description || 'Environment description',
                 'name': option.name || 'Environment name'
             };
+
+            Object.defineProperty(environment, 'toggleDisabledState', {
+                    value : function(state, context, shortcut) {
+                        var ctx;
+
+                        if (isArray(context)) { // disable context in array
+                            for(var i=0, len=this.context.length; i<len; i++) {
+                                ctx = this.context[i];
+
+                                if(context.indexOf(ctx.name) !== -1) {
+                                    ctx.toggleDisabledState(state, shortcut);
+                                }
+                            }
+                        } else if(isString(context)) { // disable a single context
+                            for(var i=0, len=this.context.length; i<len; i++) {
+                                ctx = this.context[i];
+
+                                if(ctx.name === context) {
+                                    ctx.toggleDisabledState(state, shortcut);
+                                }
+                            }
+                        } else { // disable all contexts
+                            for(var i=0, len=this.context.length; i<len; i++) {
+                                ctx = this.context[i];
+                                ctx.toggleDisabledState(state, shortcut);
+                            }
+                        }
+                    },
+                    writable: false,
+                    enumerable: false,
+                    configurable: false
+            });
+
+            return environment;
         }
     };
 
-    var flattenActiveEnvironment = function(env) {
+    var flattenEnvironment = function(env) {
         var flattenedEnv = {};
 
         for (var i = env.context.length - 1; i >= 0; i--) {
@@ -152,7 +242,7 @@
             }
         };
 
-        this.enableDebug = function(state) {
+        this.debugMode = function(state) {
             debug = typeof state !== 'undefined' ? state : true;
         };
 
@@ -211,22 +301,22 @@
         this.toJSON = function(match) {
             var ret = {};
 
-            if(typeof match === 'string') { // particular env
-                ret = typeof _environments[match] !== 'undefined' ? flattenActiveEnvironment(_environments[match]) : ret;
-            } else if( Array.isArray(match) ) { // we have a list of envs
+            if (isString(match)) { // particular env
+                ret = typeof _environments[match] !== 'undefined' ? flattenEnvironment(_environments[match]) : ret;
+            } else if (isArray(match)) { // we have a list of envs
                 ret = [];
 
                 for(var i=0, len=match.length; i<len; i++) {
-                    ret.push(flattenActiveEnvironment(_environments[match[i]]));
+                    ret.push(flattenEnvironment(_environments[match[i]]));
                 }
             } else if (match === true) { // we assume we want all envs
                 ret = [];
 
                 for(var env in _environments) {
-                    ret.push(flattenActiveEnvironment(_environments[env]));
+                    ret.push(flattenEnvironment(_environments[env]));
                 }
             } else {
-                ret = flattenActiveEnvironment(_environments[active_environment]);
+                ret = flattenEnvironment(_environments[active_environment]);
             }
 
             return ret;
@@ -237,6 +327,32 @@
             'name': 'main'
         });
 
+        this.toggleDisabledState = function(state, environment, context, shortcut) {
+            // context - string or array - optional
+            // shortcut - string or array - optional
+            var env;
+
+            if (isArray(environment)) {
+                for(var i=0, len = environment.length; i<len; i++) {
+                    env = _environments[environment[i]];
+
+                    if(typeof env !== 'undefined') {
+                        env.toggleDisabledState(state, context, shortcut);
+                    }
+                }
+            } else if(isString(environment)) {
+                env = _environments[environment];
+
+                if(typeof env !== 'undefined') {
+                    env.toggleDisabledState(state, context, shortcut);
+                }
+            } else {
+                for(env in _environments) {
+                    _environments[env].toggleDisabledState(state, context, shortcut);
+                }
+            }
+        };
+
         document.getElementsByTagName('body')[0].addEventListener('keypress', function(e) {
             var key = e.keyCode ? e.keyCode : e.which;
             var shortcut = String.fromCharCode(key);
@@ -246,7 +362,7 @@
             for (var i = activeEnvironment.context.length - 1; i >= 0; i--) {
                 var _shortcut = activeEnvironment.context[i].shortcut[shortcut];
 
-                if(_shortcut)  {
+                if(_shortcut && !_shortcut.disabled)  {
                     if(debug) {
                         printDebugConsoleMessage(_shortcut);
                     }
