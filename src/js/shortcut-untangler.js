@@ -76,8 +76,8 @@
         create: function(option) {
             var shortcut = {
                 'key': option.key,
-                'description': option.description || 'Shortcut description',
-                'name': option.name || 'Shortcut name',
+                'description': option.description || 'Keyboard shortcut handler triggered by key: ' + option.key,
+                'name': option.name || 'Shortcut for: ' + option.key,
                 'callback': option.callback
             };
 
@@ -117,8 +117,8 @@
         create: function(option) {
             var context = {
                 'shortcut': {},
-                'description': option.description || 'Context description',
-                'name': option.name || 'Context name',
+                'description': option.description,
+                'name': option.name,
                 'weight': option.weight || 0
             };
 
@@ -170,8 +170,8 @@
         create: function(option) {
             var environment = {
                 'context': [],
-                'description': option.description || 'Environment description',
-                'name': option.name || 'Environment name'
+                'description': option.description,
+                'name': option.name
             };
 
             Object.defineProperty(environment, 'toggleDisabledState', {
@@ -187,16 +187,16 @@
                                 }
                             }
                         } else if(isString(context)) { // disable a single context
-                            for(var i=0, len=this.context.length; i<len; i++) {
-                                ctx = this.context[i];
+                            for(var k=0, klen=this.context.length; k<klen; k++) {
+                                ctx = this.context[k];
 
                                 if(ctx.name === context) {
                                     ctx.toggleDisabledState(state, shortcut);
                                 }
                             }
                         } else { // disable all contexts
-                            for(var i=0, len=this.context.length; i<len; i++) {
-                                ctx = this.context[i];
+                            for(var j=0, jlen=this.context.length; j<jlen; j++) {
+                                ctx = this.context[j];
                                 ctx.toggleDisabledState(state, shortcut);
                             }
                         }
@@ -231,9 +231,12 @@
         return flattenedEnv;
     };
 
-    var ShortcutUntangler = function() {
-        var active_environment = 'main';
-        var debug = false;
+    var ShortcutUntangler = function(option) {
+        option = option || {};
+
+        var active_environment = 'main' || option.mainEnvironment;
+        var debug = false || option.debug;
+        var rootElement = document.getElementsByTagName('body')[0] || option.rootElement;
         var _environments = {};
 
         this.changeEnvironment = function(environmentName) {
@@ -323,13 +326,11 @@
         };
 
         this.createEnvironment({
-            'description': 'Default shortcuts environment',
-            'name': 'main'
+            'description': option.mainEnvironmentDescription || 'Default shortcuts environment',
+            'name': active_environment
         });
 
         this.toggleDisabledState = function(state, environment, context, shortcut) {
-            // context - string or array - optional
-            // shortcut - string or array - optional
             var env;
 
             if (isArray(environment)) {
@@ -353,7 +354,7 @@
             }
         };
 
-        document.getElementsByTagName('body')[0].addEventListener('keypress', function(e) {
+        rootElement.addEventListener('keypress', function(e) {
             var key = e.keyCode ? e.keyCode : e.which;
             var shortcut = String.fromCharCode(key);
             var activeEnvironment = _environments[active_environment];

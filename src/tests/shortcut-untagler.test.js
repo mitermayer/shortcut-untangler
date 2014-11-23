@@ -43,6 +43,20 @@ describe('Shortcut Untangler tests', function() {
         });
     });
 
+    describe('Initialization', function() {
+        it('should allow to overwritte the default environment name', function() {
+        });
+
+        it('should allow to overwritte the default environment description', function() {
+        });
+
+        it('should allow to overwritte the default rootElement', function() {
+        });
+
+        it('should allow to overwritte the debug enabled state', function() {
+        });
+    });
+
     describe('Debug support', function() {
         beforeEach(function() {
             shortcutUntangler = new ShortcutUntangler();
