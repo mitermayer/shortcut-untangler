@@ -1,0 +1,19 @@
+<!DOCTYPE>
+<html>
+  <title>Demo</title>
+  <body>
+  <h1>Press key 'F' and expect a browser alert</h1>
+  <script src="src/js/shortcut-untangler.js"></script>
+  <script>
+      shortcutUntangler = new ShortcutUntangler();
+      shortcutUntangler.createShortcut({
+          name: 'My shortcut',
+          description: 'My shortcut description',
+          key: 'F',
+          callback: function() {
+            alert('Hello World - You have just pressed key "F"');
+          }
+      });
+  </script>
+  </body>
+</html>
