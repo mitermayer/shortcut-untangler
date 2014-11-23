@@ -161,7 +161,7 @@
                 throw new Error('Environment name "' + option.name + '" is already set');
             }
 
-            if (!option || !hasRequiredArguments(['name', 'description'], option)) {
+            if (!option || !hasRequiredArguments(['name'], option)) {
                 throw new Error('InvalidArguments');
             }
 
@@ -170,7 +170,6 @@
         create: function(option) {
             var environment = {
                 'context': [],
-                'description': option.description,
                 'name': option.name
             };
 
@@ -234,9 +233,11 @@
     var ShortcutUntangler = function(option) {
         option = option || {};
 
-        var active_environment = 'main' || option.mainEnvironment;
+        var defaultEnvironmentName = option.mainEnvironment || 'main';
+        var defaultContextName = option.mainContext || 'main';
+        var active_environment = defaultEnvironmentName;
         var debug = false || option.debug;
-        var rootElement = document.getElementsByTagName('body')[0] || option.rootElement;
+        var rootElement = option.rootElement || document.getElementsByTagName('body')[0];
         var _environments = {};
 
         this.changeEnvironment = function(environmentName) {
@@ -265,7 +266,7 @@
 
         this.createEnvironment = function(option, targetBaseEnv) {
             var newEnv;
-            var rootEnv = typeof targetBaseEnv !== 'undefined' ? targetBaseEnv : 'main';
+            var rootEnv = typeof targetBaseEnv !== 'undefined' ? targetBaseEnv : defaultEnvironmentName;
 
             Environment.validate(option, _environments);
 
@@ -276,7 +277,7 @@
 
              //we make sure each new environment has a main context
             this.createContext({
-                name: 'main',
+                name: defaultContextName,
                 description: 'Default shortcuts environment context'
             }, option.name);
 
@@ -326,7 +327,6 @@
         };
 
         this.createEnvironment({
-            'description': option.mainEnvironmentDescription || 'Default shortcuts environment',
             'name': active_environment
         });
 

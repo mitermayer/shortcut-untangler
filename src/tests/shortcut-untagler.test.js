@@ -44,31 +44,102 @@ describe('Shortcut Untangler tests', function() {
     });
 
     describe('Initialization', function() {
-        it('should allow to overwritte the default environment name', function() {
+        var body = document.getElementsByTagName('body')[0];
+        var initialBodyContent = body.innerHTML;
+
+        afterEach(function() {
+            shortcutUntangler.debugMode(false);
+            body.innerHTML = initialBodyContent;
         });
 
-        it('should allow to overwritte the default environment description', function() {
+        it('should allow to overwritte the default environment name', function() {
+            shortcutUntangler = new ShortcutUntangler({
+                mainEnvironment: 'foo'
+            });
+
+            shortcutUntangler.createShortcut({
+                key: 'e',
+                callback: function(){}
+            });
+
+            var environmentJson = shortcutUntangler.toJSON('foo');
+
+            expect(environmentJson).not.toEqual({});
+        });
+
+        it('should allow to overwritte the default context name', function() {
+            shortcutUntangler = new ShortcutUntangler({
+                mainContext: 'foo'
+            });
+
+            expect(function() {
+                shortcutUntangler.createContext({
+                    name: 'foo',
+                    description: 'should error since should already exit'
+                });
+            }).toThrow();
         });
 
         it('should allow to overwritte the default rootElement', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcut2 = jasmine.createSpy();
+            var shortcutBoundDiv;
+
+            body.innerHTML = '<div id="shortcutBoundDiv"></div>';
+
+            shortcutBoundDiv = document.getElementById('shortcutBoundDiv');
+
+            shortcutUntangler = new ShortcutUntangler({
+                rootElement: shortcutBoundDiv
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'e',
+                callback: shortcut
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'shortcut2',
+                description: 'My shortcut description',
+                key: 'f',
+                callback: shortcut2
+            });
+
+            triggerNativeKeyHotkey('e', body);
+            triggerNativeKeyHotkey('f', shortcutBoundDiv);
+
+            expect(shortcut).not.toHaveBeenCalled();
+            expect(shortcut2).toHaveBeenCalled();
         });
 
         it('should allow to overwritte the debug enabled state', function() {
+            shortcutUntangler = new ShortcutUntangler({
+                debug: true
+            });
+
+            spyOn(console, 'log');
+
+            shortcutUntangler.createShortcut({
+                key: 'e',
+                callback: function(){}
+            });
+
+            triggerNativeKeyHotkey('e');
+
+            expect(console.log).toHaveBeenCalled();
         });
     });
 
     describe('Debug support', function() {
-        beforeEach(function() {
-            shortcutUntangler = new ShortcutUntangler();
-            shortcutUntangler.debugMode();
-        });
-
         afterEach(function() {
             shortcutUntangler.debugMode(false);
-            shortcutUntangler = null;
         });
 
         it('should call "console.log" when debug is enabled', function() {
+            shortcutUntangler.debugMode();
+
             spyOn(console, 'log');
 
             shortcutUntangler.createShortcut({
@@ -111,8 +182,7 @@ describe('Shortcut Untangler tests', function() {
         it('should return a list of flattened environments when passing a list of environment', function() {
 
             shortcutUntangler.createEnvironment({
-                name: 'other',
-                description: 'bar'
+                name: 'other'
             });
 
             shortcutUntangler.changeEnvironment('other');
@@ -124,8 +194,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'foo',
-                description: 'bar'
+                name: 'foo'
             });
 
             shortcutUntangler.changeEnvironment('foo');
@@ -150,8 +219,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'other',
-                description: 'bar'
+                name: 'other'
             }, false);
 
             shortcutUntangler.changeEnvironment('other');
@@ -163,8 +231,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'foo',
-                description: 'bar'
+                name: 'foo'
             }, false);
 
             shortcutUntangler.changeEnvironment('foo');
@@ -275,18 +342,10 @@ describe('Shortcut Untangler tests', function() {
             expect(shortcutUntangler.createEnvironment).toThrow();
         });
 
-        it('should throw an exception when creating environment without a name', function() {
+        it('should throw an exception when creating environment without name', function() {
             expect(function() {
                 shortcutUntangler.createEnvironment({
-                    description: 'lorem ipsum'
-                });
-            }).toThrow();
-        });
-
-        it('should throw an exception when creating environment without a description', function() {
-            expect(function() {
-                shortcutUntangler.createEnvironment({
-                    name: 'foo'
+                    'invalid': 'lorem'
                 });
             }).toThrow();
         });
@@ -294,30 +353,26 @@ describe('Shortcut Untangler tests', function() {
         it('should not throw an exception when creating environment with name and description', function() {
             expect(function() {
                 shortcutUntangler.createEnvironment({
-                    name: 'lorem',
-                    description: 'lorem ipsum'
+                    name: 'lorem'
                 });
             }).not.toThrow();
         });
 
         it('should throw an exception when trying to create an environment with a name that already exists', function() {
             shortcutUntangler.createEnvironment({
-                name: 'lorem',
-                description: 'lorem ipsum'
+                name: 'lorem'
             });
 
             expect(function() {
                 shortcutUntangler.createEnvironment({
-                    name: 'lorem',
-                    description: 'lorem ipsum'
+                    name: 'lorem'
                 });
             }).toThrow();
         });
 
         it('should have active environment name set to "lorem" when creating a new environment and updating to it', function() {
             shortcutUntangler.createEnvironment({
-                name: 'lorem',
-                description: 'lorem ipsum'
+                name: 'lorem'
             });
 
             shortcutUntangler.changeEnvironment('lorem');
@@ -339,8 +394,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'lorem',
-                description: 'lorem ipsum'
+                name: 'lorem'
             });
 
             shortcutUntangler.changeEnvironment('lorem');
@@ -350,8 +404,7 @@ describe('Shortcut Untangler tests', function() {
 
         it('should allow new environment to be created based on another environment', function() {
             shortcutUntangler.createEnvironment({
-                name: 'lorem',
-                description: 'lorem ipsum'
+                name: 'lorem'
             });
 
             // create a new shortcut for the environment lorem
@@ -363,8 +416,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'bar',
-                description: 'lorem ipsum'
+                name: 'bar'
             }, 'lorem');
 
             expect(shortcutUntangler.toJSON('bar')['e'].name).toEqual('bar');
@@ -372,8 +424,7 @@ describe('Shortcut Untangler tests', function() {
 
         it('should allow new environment to be created bare without being based on another environment', function() {
             shortcutUntangler.createEnvironment({
-                name: 'lorem',
-                description: 'lorem ipsum'
+                name: 'lorem'
             });
 
             // create a new shortcut for the environment lorem
@@ -385,8 +436,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'bar',
-                description: 'lorem ipsum'
+                name: 'bar'
             }, false);
 
             expect(shortcutUntangler.toJSON('bar')).toEqual({});
@@ -394,8 +444,7 @@ describe('Shortcut Untangler tests', function() {
 
         it('should create a bare environment when a non existent context to base the environment from', function() {
             shortcutUntangler.createEnvironment({
-                name: 'lorem',
-                description: 'lorem ipsum'
+                name: 'lorem'
             });
 
             // create a new shortcut for the environment lorem
@@ -407,8 +456,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'bar',
-                description: 'lorem ipsum'
+                name: 'bar'
             }, "nonexistent");
 
             expect(shortcutUntangler.toJSON('bar')).toEqual({});
@@ -562,8 +610,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'other',
-                description: 'bar'
+                name: 'other'
             }, false);
 
             shortcutUntangler.changeEnvironment('other');
@@ -597,8 +644,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'foo',
-                description: 'bar'
+                name: 'foo'
             }, false);
 
             shortcutUntangler.changeEnvironment('foo');
@@ -634,8 +680,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'foo',
-                description: 'bar'
+                name: 'foo'
             }, false);
 
             shortcutUntangler.changeEnvironment('foo');
@@ -647,8 +692,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'bar',
-                description: 'lorem ipsum'
+                name: 'bar'
             }, false);
 
             shortcutUntangler.changeEnvironment('bar');
@@ -689,8 +733,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'foo',
-                description: 'bar'
+                name: 'foo'
             }, false);
 
             shortcutUntangler.changeEnvironment('foo');
@@ -702,8 +745,7 @@ describe('Shortcut Untangler tests', function() {
             });
 
             shortcutUntangler.createEnvironment({
-                name: 'bar',
-                description: 'lorem ipsum'
+                name: 'bar'
             }, false);
 
             shortcutUntangler.changeEnvironment('bar');
