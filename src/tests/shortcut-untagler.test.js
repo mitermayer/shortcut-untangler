@@ -258,15 +258,7 @@ describe('Shortcut Untangler tests', function() {
         it('should throw an exception when creating context without a name', function() {
             expect(function() {
                 shortcutUntangler.createContext({
-                    description: 'lorem ipsum'
-                });
-            }).toThrow();
-        });
-
-        it('should throw an exception when creating context without a description', function() {
-            expect(function() {
-                shortcutUntangler.createContext({
-                    name: 'foo'
+                    'invalid': true
                 });
             }).toThrow();
         });
@@ -274,8 +266,7 @@ describe('Shortcut Untangler tests', function() {
         it('should not throw an exception when creating context with name and description', function() {
             expect(function() {
                 shortcutUntangler.createContext({
-                    name: 'lorem',
-                    description: 'lorem ipsum'
+                    name: 'lorem'
                 });
             }).not.toThrow();
         });
@@ -283,14 +274,12 @@ describe('Shortcut Untangler tests', function() {
         it('should throw an exception when trying to create a context with a name that already exists', function() {
 
             shortcutUntangler.createContext({
-                name: 'lorem',
-                description: 'lorem ipsum'
+                name: 'lorem'
             });
 
             expect(function() {
                 shortcutUntangler.createContext({
-                    name: 'lorem',
-                    description: 'lorem ipsum'
+                    name: 'lorem'
                 });
             }).toThrow();
         });
@@ -300,13 +289,11 @@ describe('Shortcut Untangler tests', function() {
 
             shortcutUntangler.createContext({
                 name: 'ipsum',
-                description: 'lorem ipsum',
                 weight: 2
             });
 
             shortcutUntangler.createContext({
                 name: 'lorem',
-                description: 'lorem ipsum',
                 weight: 1
             });
 
@@ -523,13 +510,11 @@ describe('Shortcut Untangler tests', function() {
         it('should a shortcut has the same key bindings on a particular environment the one with higher weight should be represented on the flattened json representation of the current active environment', function() {
             shortcutUntangler.createContext({
                 name: 'ipsum',
-                description: 'lorem ipsum',
                 weight: 2
             });
 
             shortcutUntangler.createContext({
                 name: 'lorem',
-                description: 'lorem ipsum',
                 weight: 1
             });
 
@@ -562,13 +547,11 @@ describe('Shortcut Untangler tests', function() {
         it('should a shortcut has the same key bindings on a particular environment and the context has the same weight the one that the context was added last should be represented on the flattened json representation of the current active environment', function() {
             shortcutUntangler.createContext({
                 name: 'ipsum',
-                description: 'lorem ipsum',
                 weight: 2
             });
 
             shortcutUntangler.createContext({
                 name: 'lorem',
-                description: 'lorem ipsum',
                 weight: 2
             });
 
@@ -786,7 +769,6 @@ describe('Shortcut Untangler tests', function() {
 
             shortcutUntangler.createContext({
                 name: 'other',
-                description: 'lorem ipsum',
                 weight: 1
             });
 
@@ -818,7 +800,6 @@ describe('Shortcut Untangler tests', function() {
 
             shortcutUntangler.createContext({
                 name: 'other',
-                description: 'lorem ipsum',
                 weight: 1
             });
 
@@ -851,13 +832,11 @@ describe('Shortcut Untangler tests', function() {
 
             shortcutUntangler.createContext({
                 name: 'other',
-                description: 'lorem ipsum',
                 weight: 1
             });
 
             shortcutUntangler.createContext({
                 name: 'foo',
-                description: 'lorem ipsum',
                 weight: 2
             });
 
@@ -890,7 +869,6 @@ describe('Shortcut Untangler tests', function() {
 
             shortcutUntangler.createContext({
                 name: 'other',
-                description: 'lorem ipsum',
                 weight: 1
             });
 
@@ -923,7 +901,6 @@ describe('Shortcut Untangler tests', function() {
 
             shortcutUntangler.createContext({
                 name: 'other',
-                description: 'lorem ipsum',
                 weight: 1
             });
 
@@ -956,7 +933,6 @@ describe('Shortcut Untangler tests', function() {
 
             shortcutUntangler.createContext({
                 name: 'other',
-                description: 'lorem ipsum',
                 weight: 1
             });
 
@@ -989,7 +965,6 @@ describe('Shortcut Untangler tests', function() {
 
             shortcutUntangler.createContext({
                 name: 'other',
-                description: 'lorem ipsum',
                 weight: 1
             });
 

@@ -108,7 +108,7 @@
                 throw new Error('Context name "' + option.name + '" is already set on environment "' +  targetEnvironment.name + '"');
             }
 
-            if (!option || !hasRequiredArguments(['name', 'description'], option)) {
+            if (!option || !hasRequiredArguments(['name'], option)) {
                 throw new Error('InvalidArguments');
             }
 
@@ -117,7 +117,6 @@
         create: function(option) {
             var context = {
                 'shortcut': {},
-                'description': option.description,
                 'name': option.name,
                 'weight': option.weight || 0
             };
@@ -277,8 +276,7 @@
 
              //we make sure each new environment has a main context
             this.createContext({
-                name: defaultContextName,
-                description: 'Default shortcuts environment context'
+                name: defaultContextName
             }, option.name);
 
             if(rootEnv !== false) { // we will base the environment on another environment unless we explicit say we want a bare environment
