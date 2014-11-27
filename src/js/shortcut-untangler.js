@@ -1,6 +1,6 @@
 (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-        define('shortcutUntangler', [], factory);
+        define('ShortcutUntangler', [], factory);
     } else {
         root.ShortcutUntangler = factory();
     }
@@ -8,36 +8,74 @@
 
     'use scrict';
 
+    /**
+     * Checks to see if Object is of type string
+     *
+     * @param {Object} match
+     * @return {Boolean}
+     */
     var isString = function(match) {
         return typeof match === 'string';
     };
 
+    /**
+     * Checks to see if match is an array
+     *
+     * @param {Object} match
+     * @return {Boolean}
+     */
     var isArray = function(match) {
         return Array.isArray(match);
     };
 
+    /**
+     * Checks to see if object has defined all the required params
+     *
+     * @param {Array} required - list of required params to be checked
+     * @param {Object} option - object to be checked
+     * @return {Boolean}
+     */
     var hasRequiredArguments = function(required, option) {
         return required.every(function(key) {
             return typeof option[key] !== 'undefined';
         });
     };
 
+    /**
+     * Prints a debugging console message for a shortcut
+     *
+     * @param {Shortcut} shortcut - shortcut object
+     */
     var printDebugConsoleMessage = function(shortcut) {
-            console.log('Shortcut "' + shortcut.name + '" triggered with key "' + shortcut.key + '"', shortcut);
+        console.log('Shortcut "' + shortcut.name + '" triggered with key "' + shortcut.key + '"', shortcut);
     };
 
+    /**
+     * Checks what should be the context placement index based on the context weight
+     *
+     * The index returned is meant to be used with Array.splice
+     *
+     * @param {Array[Context]} contextArr - list of existing contexts for the target environment
+     * @param {Context} newContext - context that is being created
+     * @return {Number} - index for newContext placement on contextArr
+     */
     var getContextPlacementIndex = function(contextArr, newContext) {
-        var placementIndex = contextArr.length; // defaults to add push it to the end
+        var placementIndex = contextArr.length; // defaults to push it to the end
         var newContextWeight = newContext.weight;
+        var _curContext;
 
-        for( var i=0, len=contextArr.length; i<len; i++) {
+        for (var i = contextArr.length -1; i >= 0; i--) {
             _curContext = contextArr[i];
 
-            if(newContextWeight < _curContext.weight) {
-                placementIndex = i;
-                break;
-            } else if(newContextWeight === _curContext.weight) {
+            if(newContextWeight === _curContext.weight) {
+                // if current context has the same weight
+                // we return one index greater to insert the new item after it
                 placementIndex = i+1;
+                break;
+            } else if(newContextWeight < _curContext.weight) {
+                // if current context has greater weight
+                // we return the current index to insert the new item before it
+                placementIndex = i;
                 break;
             }
         }
@@ -45,8 +83,15 @@
         return placementIndex;
     };
 
+    /**
+     * Check what is the index for context based on the context name
+     *
+     * @param {Array[Context]} contextArr - list of existing contexts for the target environment
+     * @param {String} contextName
+     * @return {Number|0} - returns the index of a context or 0
+     */
     var getContextIndex = function(contextArr, contextName) {
-        var targetContextIndex = 0; // defaults to main
+        var targetContextIndex = 0; // defaults to 0 since there will always be at least one context
         var _context;
 
         for( var i=0, len=contextArr.length; i<len; i++) {
@@ -59,6 +104,36 @@
         }
 
         return targetContextIndex;
+    };
+
+    /**
+     * Get the shortcuts that are active for a particular envionment
+     * by taking in consideration the context weight and the disabled status on shortcuts
+     *
+     * @param {String} env - environment name to be flattened
+     * @return {Object} - return a tree of the active shortcuts
+     */
+    var flattenEnvironment = function(env) {
+        var flattenedEnv = {};
+
+        for (var i = env.context.length - 1; i >= 0; i--) {
+            var _context = env.context[i].shortcut;
+            var _shotcut;
+
+            for (_shortcut in _context) {
+                var shortcutInfo = _context[_shortcut];
+
+                if(flattenedEnv[_shortcut] || shortcutInfo.disabled ) {
+                    // we want to make sure only one shortcut exists per key and
+                    // also making sure it is not disabled
+                    continue;
+                }
+
+                flattenedEnv[_shortcut] = shortcutInfo;
+            }
+        }
+
+        return flattenedEnv;
     };
 
     var Shortcut = {
@@ -208,28 +283,7 @@
         }
     };
 
-    var flattenEnvironment = function(env) {
-        var flattenedEnv = {};
-
-        for (var i = env.context.length - 1; i >= 0; i--) {
-            var _context = env.context[i].shortcut;
-            var _shotcut;
-
-            for (_shortcut in _context) {
-                var shortcutInfo = _context[_shortcut];
-
-                if(flattenedEnv[_shortcut]) { // we want to preserve weight algorithm, so if a shortcut has already been set we should not add to the env
-                    continue;
-                }
-
-                flattenedEnv[_shortcut] = shortcutInfo;
-            }
-        }
-
-        return flattenedEnv;
-    };
-
-    var ShortcutUntangler = function(option) {
+    return function ShortcutUntangler(option) {
         option = option || {};
 
         var defaultEnvironmentName = option.mainEnvironment || 'main';
@@ -239,14 +293,99 @@
         var rootElement = option.rootElement || document.getElementsByTagName('body')[0];
         var _environments = {};
 
+        /**
+         * Update the active environment to the target environment
+         *
+         * @param environmentName - name of the target environment
+         * @return {undefined}
+         */
         this.changeEnvironment = function(environmentName) {
             if(_environments[environmentName]) {
                 active_environment = environmentName;
             }
         };
 
+        /**
+         * Set up debugging mode.
+         *
+         * While enabled messages will be printed to the console
+         *
+         * @param state
+         * @return {undefined}
+         */
         this.debugMode = function(state) {
             debug = typeof state !== 'undefined' ? state : true;
+        };
+
+        /**
+         * Disables environment, contexts and shortcuts
+         *
+         * @param {Boolean} state - optinal defaults to toggle
+         * @param {String|Array[String]} environment - optional defaults to all environments
+         * @param {String|Array[String]} context - optional defaults to all contexts of environment
+         * @param {String|Array[String]} shortcut - optinal deafaults to all shortcuts of context
+         */
+        this.toggleDisabledState = function(state, environment, context, shortcut) {
+            var env;
+
+            if (isArray(environment)) {
+                for(var i=0, len = environment.length; i<len; i++) {
+                    env = _environments[environment[i]];
+
+                    if(typeof env !== 'undefined') {
+                        env.toggleDisabledState(state, context, shortcut);
+                    }
+                }
+            } else if(isString(environment)) {
+                env = _environments[environment];
+
+                if(typeof env !== 'undefined') {
+                    env.toggleDisabledState(state, context, shortcut);
+                }
+            } else {
+                for(env in _environments) {
+                    _environments[env].toggleDisabledState(state, context, shortcut);
+                }
+            }
+        };
+
+        /**
+         * Return the name of the current active environment
+         *
+         * @return {undefined}
+         */
+        this.getActiveEnvironment = function() {
+            return active_environment;
+        };
+
+        /**
+         * Return a json representation of the flattened environment
+         *
+         * @param {String|Array[String]} match - name of the environment to be flattened defaults to current environment
+         * @return {JSON}
+         */
+        this.toJSON = function(match) {
+            var ret = {};
+
+            if (isString(match)) { // particular env
+                ret = typeof _environments[match] !== 'undefined' ? flattenEnvironment(_environments[match]) : ret;
+            } else if (isArray(match)) { // we have a list of envs
+                ret = [];
+
+                for(var i=0, len=match.length; i<len; i++) {
+                    ret.push(flattenEnvironment(_environments[match[i]]));
+                }
+            } else if (match === true) { // we assume we want all envs
+                ret = [];
+
+                for(var env in _environments) {
+                    ret.push(flattenEnvironment(_environments[env]));
+                }
+            } else {
+                ret = flattenEnvironment(_environments[active_environment]);
+            }
+
+            return ret;
         };
 
         this.createContext = function(option, environment) {
@@ -296,61 +435,10 @@
             shortcutContext[option.key] = Shortcut.create(option);
         };
 
-        this.getActiveEnvironment = function() {
-            return active_environment;
-        };
-
-        this.toJSON = function(match) {
-            var ret = {};
-
-            if (isString(match)) { // particular env
-                ret = typeof _environments[match] !== 'undefined' ? flattenEnvironment(_environments[match]) : ret;
-            } else if (isArray(match)) { // we have a list of envs
-                ret = [];
-
-                for(var i=0, len=match.length; i<len; i++) {
-                    ret.push(flattenEnvironment(_environments[match[i]]));
-                }
-            } else if (match === true) { // we assume we want all envs
-                ret = [];
-
-                for(var env in _environments) {
-                    ret.push(flattenEnvironment(_environments[env]));
-                }
-            } else {
-                ret = flattenEnvironment(_environments[active_environment]);
-            }
-
-            return ret;
-        };
-
+        // create a new environment
         this.createEnvironment({
             'name': active_environment
         });
-
-        this.toggleDisabledState = function(state, environment, context, shortcut) {
-            var env;
-
-            if (isArray(environment)) {
-                for(var i=0, len = environment.length; i<len; i++) {
-                    env = _environments[environment[i]];
-
-                    if(typeof env !== 'undefined') {
-                        env.toggleDisabledState(state, context, shortcut);
-                    }
-                }
-            } else if(isString(environment)) {
-                env = _environments[environment];
-
-                if(typeof env !== 'undefined') {
-                    env.toggleDisabledState(state, context, shortcut);
-                }
-            } else {
-                for(env in _environments) {
-                    _environments[env].toggleDisabledState(state, context, shortcut);
-                }
-            }
-        };
 
         rootElement.addEventListener('keypress', function(e) {
             var key = e.keyCode ? e.keyCode : e.which;
@@ -372,6 +460,4 @@
             }
         }, false);
     };
-
-    return ShortcutUntangler;
 }));

@@ -1,5 +1,4 @@
-describe('Shortcut Untangler tests', function() {
-    var shortcutUntangler;
+describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
     beforeEach(function() {
         shortcutUntangler = new ShortcutUntangler();
@@ -544,7 +543,7 @@ describe('Shortcut Untangler tests', function() {
             expect(environmentJson['e'].name).toEqual('bar');
         });
 
-        it('should a shortcut has the same key bindings on a particular environment and the context has the same weight the one that the context was added last should be represented on the flattened json representation of the current active environment', function() {
+        it('should a shortcut has the same key bindings on a particular environment and the context has the same weight the one that was added last should be represented on the flattened json of the current active environment', function() {
             shortcutUntangler.createContext({
                 name: 'ipsum',
                 weight: 2
@@ -568,6 +567,7 @@ describe('Shortcut Untangler tests', function() {
                 key: 'e',
                 callback: function(){}
             }, 'ipsum');
+
 
             shortcutUntangler.createShortcut({
                 name: 'three',
