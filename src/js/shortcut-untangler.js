@@ -137,6 +137,16 @@
     };
 
     var Shortcut = {
+        getKeyName: function(key) {
+            if(key.indexOf(' ') !== -1) { // cleans multiple spaces and makes sure that multiple keys have same unique key idependently of the order they pass as arguments
+                key = key.toUpperCase().split(" ").filter(function(e) {
+                    // removes 0, null, undefined, ""
+                    return e;
+                }).sort().join("+");
+            }
+
+            return key;
+        },
         validate: function(option, shortcutContext) {
             if(shortcutContext[option.key]) {
                 throw new Error('Shortcut key "' + option.key + '" is already set on context this context');
@@ -428,6 +438,9 @@
             var activeEnvironment = _environments[this.getActiveEnvironment()];
             var targetContextIndex = getContextIndex(activeEnvironment.context, contextName);
             var shortcutContext = activeEnvironment.context[targetContextIndex].shortcut;
+
+            // allows support for multiple keys, and make sure that the order of keys pressed won't matter
+            option.key = Shortcut.getKeyName(option.key);
 
             // check for unique and required params
             Shortcut.validate(option, shortcutContext);

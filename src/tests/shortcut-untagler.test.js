@@ -493,6 +493,34 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             }).toThrow();
         });
 
+        it('should throw an exception when trying to create a shortcut with same key bidings placed on different order', function() {
+            shortcutUntangler.createShortcut({
+                key: 'SHIFT ALT',
+                callback: function(){}
+            });
+
+            expect(function() {
+                shortcutUntangler.createShortcut({
+                    key: 'ALT SHIFT',
+                    callback: function(){}
+                });
+            }).toThrow();
+        });
+
+        it('should throw an exception when trying to create a shortcut with same key bidings placed on different order and with diffent type case', function() {
+            shortcutUntangler.createShortcut({
+                key: 'SHIFT ALT',
+                callback: function(){}
+            });
+
+            expect(function() {
+                shortcutUntangler.createShortcut({
+                    key: 'alt shift',
+                    callback: function(){}
+                });
+            }).toThrow();
+        });
+
         it('should add a shortcut to the flattened json representation of the current active environment', function() {
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
