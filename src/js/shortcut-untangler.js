@@ -453,7 +453,7 @@
             'name': active_environment
         });
 
-        rootElement.addEventListener('keypress', function(e) {
+        rootElement.addEventListener('keydown', function(e) {
             var key = e.keyCode ? e.keyCode : e.which;
             var shortcut = String.fromCharCode(key);
             var activeEnvironment = _environments[active_environment];
@@ -467,7 +467,7 @@
                         printDebugConsoleMessage(_shortcut);
                     }
 
-                    _shortcut.callback(arguments);
+                    _shortcut.callback.apply(this, arguments);
                     break;
                 }
             }

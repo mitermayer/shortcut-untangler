@@ -1045,7 +1045,7 @@ function triggerNativeKeyHotkey(keyCode, el) {
     el = el || document.getElementsByTagName('body')[0];
 
     if(eventObj.initEvent){
-      eventObj.initEvent('keypress', true, true);
+      eventObj.initEvent('keydown', true, true);
     }
 
     keyCode = keyCode.charCodeAt(0);
