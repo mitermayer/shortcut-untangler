@@ -8,6 +8,76 @@
 
     'use scrict';
 
+    // not supporting meta at the moment
+    var KEY_MODIFIERS = ["alt", "ctrl", "shift"];
+
+    var MODFIER_KEY_CODES = {
+      8: "backspace",
+      9: "tab",
+      10: "return",
+      13: "return",
+      16: "shift",
+      17: "ctrl",
+      18: "alt",
+      19: "pause",
+      20: "capslock",
+      27: "esc",
+      32: "space",
+      33: "pageup",
+      34: "pagedown",
+      35: "end",
+      36: "home",
+      37: "left",
+      38: "up",
+      39: "right",
+      40: "down",
+      45: "insert",
+      46: "del",
+      59: ";",
+      61: "=",
+      96: "0",
+      97: "1",
+      98: "2",
+      99: "3",
+      100: "4",
+      101: "5",
+      102: "6",
+      103: "7",
+      104: "8",
+      105: "9",
+      106: "*",
+      107: "+",
+      109: "-",
+      110: ".",
+      111: "/",
+      112: "f1",
+      113: "f2",
+      114: "f3",
+      115: "f4",
+      116: "f5",
+      117: "f6",
+      118: "f7",
+      119: "f8",
+      120: "f9",
+      121: "f10",
+      122: "f11",
+      123: "f12",
+      144: "numlock",
+      145: "scroll",
+      173: "-",
+      186: ";",
+      187: "=",
+      188: ",",
+      189: "-",
+      190: ".",
+      191: "/",
+      192: "`",
+      219: "[",
+      220: "\\",
+      221: "]",
+      222: "'"
+    };
+
     /**
      * Checks to see if Object is of type string
      *
@@ -139,13 +209,13 @@
     var Shortcut = {
         getKeyName: function(key) {
             if(key.indexOf(' ') !== -1) { // cleans multiple spaces and makes sure that multiple keys have same unique key idependently of the order they pass as arguments
-                key = key.toUpperCase().split(" ").filter(function(e) {
+                key = key.toLowerCase().split(" ").filter(function(e) {
                     // removes 0, null, undefined, ""
                     return e;
                 }).sort().join("+");
             }
 
-            return key;
+            return key.toUpperCase();
         },
         validate: function(option, shortcutContext) {
             if(shortcutContext[option.key]) {
@@ -303,6 +373,42 @@
         var rootElement = option.rootElement || document.getElementsByTagName('body')[0];
         var _environments = {};
 
+        var keyHandler = (function() {
+            var pressedKeys = {};
+
+            return {
+                /**
+                 * converts all currently pressed keys into a single unique string
+                 *
+                 * @return {String}
+                 */
+                getKeys: function() {
+                    return Object.keys(pressedKeys).sort().join("+");
+                },
+
+                /**
+                 * register a currently pressed key
+                 *
+                 * @param {String} key - key pressed
+                 * @return {undefined}
+                 */
+                keyDown: function(key) {
+                    pressedKeys[key] = true;
+                },
+
+                /**
+                 * removes pressed key
+                 *
+                 * @param key - key released
+                 * @return {undefined}
+                 */
+                keyUp: function(key) {
+                    delete pressedKeys[key];
+                }
+            };
+        })();
+
+
         /**
          * Update the active environment to the target environment
          *
@@ -453,21 +559,48 @@
             'name': active_environment
         });
 
+        rootElement.addEventListener('keyup', function(e) {
+            var key = e.keyCode ? e.keyCode : e.which;
+            var shortcutKey = typeof MODFIER_KEY_CODES[key] !== 'undefined' ?  MODFIER_KEY_CODES[key].toUpperCase() : String.fromCharCode(key);
+
+            for(var k=0, len=KEY_MODIFIERS.length; k<len; k++) {
+                var keymod = KEY_MODIFIERS[k];
+                if(!event[keymod + 'Key']) {
+                    keyHandler.keyUp(keymod.toUpperCase());
+                }
+            }
+
+            keyHandler.keyUp(shortcutKey);
+        }, false);
+
         rootElement.addEventListener('keydown', function(e) {
             var key = e.keyCode ? e.keyCode : e.which;
-            var shortcut = String.fromCharCode(key);
+            var shortcutKey = typeof MODFIER_KEY_CODES[key] !== 'undefined' ?  MODFIER_KEY_CODES[key].toUpperCase() : String.fromCharCode(key);
             var activeEnvironment = _environments[active_environment];
+            var shortcut;
+
+            keyHandler.keyDown(shortcutKey);
+
+            if(KEY_MODIFIERS.indexOf(shortcutKey.toLowerCase()) === -1) {
+                for(var k=0, len=KEY_MODIFIERS.length; k<len; k++) {
+                    var keymod = KEY_MODIFIERS[k];
+                    if(event[keymod + 'Key']) {
+                        keyHandler.keyDown(keymod.toUpperCase());
+                    }
+                }
+            }
+
+            shortcut = keyHandler.getKeys();
 
             // loop in all context backwards searching for the key
             for (var i = activeEnvironment.context.length - 1; i >= 0; i--) {
                 var _shortcut = activeEnvironment.context[i].shortcut[shortcut];
-
                 if(_shortcut && !_shortcut.disabled)  {
                     if(debug) {
                         printDebugConsoleMessage(_shortcut);
                     }
 
-                    _shortcut.callback.apply(this, arguments);
+                    _shortcut.callback(e, arguments);
                     break;
                 }
             }

@@ -2,17 +2,46 @@
 <html>
   <title>Demo</title>
   <body>
-  <h1>Press key 'F' and expect a browser alert</h1>
-  <script src="src/js/shortcut-untangler.js"></script>
+  <h1>Press key 'E+F' and expect background color change to blue</h1>
+  <h1>Press key 'ALT+G' and expect background color change to red</h1>
+  <!--<script src="src/js/shortcut-untangler.js"></script>-->
+  <script src="shortcut-untangler.min.js"></script>
   <script>
-      shortcutUntangler = new ShortcutUntangler();
-      shortcutUntangler.createShortcut({
-          name: 'My shortcut',
-          description: 'My shortcut description',
-          key: 'F',
-          callback: function() {
-            alert('Hello World - You have just pressed key "F"');
-          }
+      var body = document.querySelector("body"),
+          bodyStyle = body.style,
+          bodyBackground;
+
+      document.addEventListener("DOMContentLoaded", function(event) {
+        shortcutUntangler = new ShortcutUntangler();
+        shortcutUntangler.debugMode(true);
+        shortcutUntangler.createShortcut({
+            name: 'My shortcut',
+            description: 'My shortcut description',
+            key: 'E F',
+            callback: function(e, f) {
+              if(bodyStyle.background !== "blue") {
+                bodyBackground = "blue";
+              } else {
+                bodyBackground = "white";
+              }
+
+              bodyStyle.background = bodyBackground;
+            }
+        });
+        shortcutUntangler.createShortcut({
+            name: 'My shortcut',
+            description: 'My shortcut description',
+            key: 'alt g',
+            callback: function(e, f) {
+              if(bodyStyle.background !== "red") {
+                bodyBackground = "red";
+              } else {
+                bodyBackground = "white";
+              }
+
+              bodyStyle.background = bodyBackground;
+            }
+        });
       });
   </script>
   </body>

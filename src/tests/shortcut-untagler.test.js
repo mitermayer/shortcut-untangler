@@ -1,3 +1,9 @@
+var MODIFIER_KEY_CODES = {
+    alt: 18,
+    shift: 16,
+    ctrl: 17
+};
+
 describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
     beforeEach(function() {
@@ -57,7 +63,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             });
 
             shortcutUntangler.createShortcut({
-                key: 'e',
+                key: 'E',
                 callback: function(){}
             });
 
@@ -95,19 +101,19 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut2',
                 description: 'My shortcut description',
-                key: 'f',
+                key: 'F',
                 callback: shortcut2
             });
 
-            triggerNativeKeyHotkey('e', body);
-            triggerNativeKeyHotkey('f', shortcutBoundDiv);
+            triggerNativeKeyHotkey('E', body);
+            triggerNativeKeyHotkey('F', shortcutBoundDiv);
 
             expect(shortcut).not.toHaveBeenCalled();
             expect(shortcut2).toHaveBeenCalled();
@@ -121,11 +127,11 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             spyOn(console, 'log');
 
             shortcutUntangler.createShortcut({
-                key: 'e',
+                key: 'E',
                 callback: function(){}
             });
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(console.log).toHaveBeenCalled();
         });
@@ -142,11 +148,11 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             spyOn(console, 'log');
 
             shortcutUntangler.createShortcut({
-                key: 'e',
+                key: 'E',
                 callback: function(){}
             });
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(console.log).toHaveBeenCalled();
         });
@@ -163,11 +169,11 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             var shortcut = jasmine.createSpy();
 
             shortcutUntangler.createShortcut({
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(shortcut).toHaveBeenCalled();
         });
@@ -188,7 +194,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut1',
-                key: 'f',
+                key: 'F',
                 callback: function(){}
             });
 
@@ -200,20 +206,20 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut2',
-                key: 'f',
+                key: 'F',
                 callback: function(){}
             });
 
             var environmentJson = shortcutUntangler.toJSON(['other', 'foo']);
 
-            expect(environmentJson[0]['f'].name).toBe('shortcut1');
-            expect(environmentJson[1]['f'].name).toBe('shortcut2');
+            expect(environmentJson[0]['F'].name).toBe('shortcut1');
+            expect(environmentJson[1]['F'].name).toBe('shortcut2');
         });
 
         it('should return list with all flattened environments when passing "true" as param', function() {
             shortcutUntangler.createShortcut({
                 name: 'shortcut0',
-                key: 'f',
+                key: 'F',
                 callback: function(){}
             });
 
@@ -225,7 +231,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut1',
-                key: 'f',
+                key: 'F',
                 callback: function(){}
             });
 
@@ -237,15 +243,15 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut2',
-                key: 'f',
+                key: 'F',
                 callback: function(){}
             });
 
             var environmentJson = shortcutUntangler.toJSON(true);
 
-            expect(environmentJson[0]['f'].name).toBe('shortcut0');
-            expect(environmentJson[1]['f'].name).toBe('shortcut1');
-            expect(environmentJson[2]['f'].name).toBe('shortcut2');
+            expect(environmentJson[0]['F'].name).toBe('shortcut0');
+            expect(environmentJson[1]['F'].name).toBe('shortcut1');
+            expect(environmentJson[2]['F'].name).toBe('shortcut2');
         });
     });
 
@@ -299,25 +305,25 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'foo',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: function(){}
             }, 'lorem');
 
             shortcutUntangler.createShortcut({
                 name: 'bar',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             }, 'ipsum');
 
             shortcutUntangler.createShortcut({
                 name: 'three',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: function(){}
             });
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(shortcut).toHaveBeenCalled();
         });
@@ -375,7 +381,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
         it('should add all active shortcuts of the main environment to the new main context of the new environment', function() {
             shortcutUntangler.createShortcut({
                 name: 'bar',
-                key: 'e',
+                key: 'E',
                 callback: function(){}
             });
 
@@ -385,7 +391,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.changeEnvironment('lorem');
 
-            expect(shortcutUntangler.toJSON()['e'].name).toEqual('bar');
+            expect(shortcutUntangler.toJSON()['E'].name).toEqual('bar');
         });
 
         it('should allow new environment to be created based on another environment', function() {
@@ -397,7 +403,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.changeEnvironment('lorem');
             shortcutUntangler.createShortcut({
                 name: 'bar',
-                key: 'e',
+                key: 'E',
                 callback: function(){}
             });
 
@@ -405,7 +411,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
                 name: 'bar'
             }, 'lorem');
 
-            expect(shortcutUntangler.toJSON('bar')['e'].name).toEqual('bar');
+            expect(shortcutUntangler.toJSON('bar')['E'].name).toEqual('bar');
         });
 
         it('should allow new environment to be created bare without being based on another environment', function() {
@@ -417,7 +423,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.changeEnvironment('lorem');
             shortcutUntangler.createShortcut({
                 name: 'bar',
-                key: 'e',
+                key: 'E',
                 callback: function(){}
             });
 
@@ -437,7 +443,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.changeEnvironment('lorem');
             shortcutUntangler.createShortcut({
                 name: 'bar',
-                key: 'e',
+                key: 'E',
                 callback: function(){}
             });
 
@@ -457,7 +463,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
         it('should throw an exception when creating shortcut without a callback', function() {
             expect(function() {
                 shortcutUntangler.createShortcut({
-                    key: 'e'
+                    key: 'E'
                 });
             }).toThrow();
         });
@@ -473,7 +479,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
         it('should not throw an exception when creating shortcut with key and callback', function() {
             expect(function() {
                 shortcutUntangler.createShortcut({
-                    key: 'e',
+                    key: 'E',
                     callback: function(){}
                 });
             }).not.toThrow();
@@ -481,18 +487,108 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
         it('should throw an exception when trying to create a shortcut with an already existent key on the same context', function() {
             shortcutUntangler.createShortcut({
-                key: 'e',
+                key: 'E',
                 callback: function(){}
             });
 
             expect(function() {
                 shortcutUntangler.createShortcut({
-                    key: 'e',
+                    key: 'E',
                     callback: function(){}
                 });
             }).toThrow();
         });
 
+        it('should add a shortcut to the flattened json representation of the current active environment', function() {
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'E',
+                callback: function(){}
+            });
+
+            var environmentJson = shortcutUntangler.toJSON();
+
+            expect(environmentJson['E'].name).toEqual('My shortcut');
+        });
+
+        it('should a shortcut has the same key bindings on a particular environment the one with higher weight should be represented on the flattened json representation of the current active environment', function() {
+            shortcutUntangler.createContext({
+                name: 'ipsum',
+                weight: 2
+            });
+
+            shortcutUntangler.createContext({
+                name: 'lorem',
+                weight: 1
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'foo',
+                description: 'My shortcut description',
+                key: 'E',
+                callback: function(){}
+            }, 'lorem');
+
+            shortcutUntangler.createShortcut({
+                name: 'bar',
+                description: 'My shortcut description',
+                key: 'E',
+                callback: function(){}
+            }, 'ipsum');
+
+            shortcutUntangler.createShortcut({
+                name: 'three',
+                description: 'My shortcut description',
+                key: 'E',
+                callback: function(){}
+            });
+
+            var environmentJson = shortcutUntangler.toJSON();
+
+            expect(environmentJson['E'].name).toEqual('bar');
+        });
+
+        it('should a shortcut has the same key bindings on a particular environment and the context has the same weight the one that was added last should be represented on the flattened json of the current active environment', function() {
+            shortcutUntangler.createContext({
+                name: 'ipsum',
+                weight: 2
+            });
+
+            shortcutUntangler.createContext({
+                name: 'lorem',
+                weight: 2
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'foo',
+                description: 'My shortcut description',
+                key: 'E',
+                callback: function(){}
+            }, 'lorem');
+
+            shortcutUntangler.createShortcut({
+                name: 'bar',
+                description: 'My shortcut description',
+                key: 'E',
+                callback: function(){}
+            }, 'ipsum');
+
+
+            shortcutUntangler.createShortcut({
+                name: 'three',
+                description: 'My shortcut description',
+                key: 'E',
+                callback: function(){}
+            });
+
+            var environmentJson = shortcutUntangler.toJSON();
+
+            expect(environmentJson['E'].name).toEqual('foo');
+        });
+    });
+
+    describe('Combo', function() {
         it('should throw an exception when trying to create a shortcut with same key bidings placed on different order', function() {
             shortcutUntangler.createShortcut({
                 key: 'SHIFT ALT',
@@ -521,92 +617,143 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             }).toThrow();
         });
 
-        it('should add a shortcut to the flattened json representation of the current active environment', function() {
+        it('should not be triggered when there are other keys pressed at the same time that are not part of the combo', function() {
+            var shortcut = jasmine.createSpy();
+
             shortcutUntangler.createShortcut({
-                name: 'My shortcut',
-                description: 'My shortcut description',
-                key: 'e',
-                callback: function(){}
+                key: 'E',
+                callback: shortcut
             });
 
-            var environmentJson = shortcutUntangler.toJSON();
 
-            expect(environmentJson['e'].name).toEqual('My shortcut');
+            triggerKeyDown('F');
+            triggerKeyDown('E');
+
+            expect(shortcut).not.toHaveBeenCalled();
         });
 
-        it('should a shortcut has the same key bindings on a particular environment the one with higher weight should be represented on the flattened json representation of the current active environment', function() {
-            shortcutUntangler.createContext({
-                name: 'ipsum',
-                weight: 2
-            });
-
-            shortcutUntangler.createContext({
-                name: 'lorem',
-                weight: 1
-            });
+        it('should be triggered when there are other keys pressed at the same time that are part of the combo', function() {
+            var shortcut = jasmine.createSpy();
 
             shortcutUntangler.createShortcut({
-                name: 'foo',
-                description: 'My shortcut description',
-                key: 'e',
-                callback: function(){}
-            }, 'lorem');
-
-            shortcutUntangler.createShortcut({
-                name: 'bar',
-                description: 'My shortcut description',
-                key: 'e',
-                callback: function(){}
-            }, 'ipsum');
-
-            shortcutUntangler.createShortcut({
-                name: 'three',
-                description: 'My shortcut description',
-                key: 'e',
-                callback: function(){}
+                key: 'e f',
+                callback: shortcut
             });
 
-            var environmentJson = shortcutUntangler.toJSON();
+            triggerKeyDown('E');
+            triggerKeyDown('F');
 
-            expect(environmentJson['e'].name).toEqual('bar');
+            expect(shortcut).toHaveBeenCalled();
         });
 
-        it('should a shortcut has the same key bindings on a particular environment and the context has the same weight the one that was added last should be represented on the flattened json of the current active environment', function() {
-            shortcutUntangler.createContext({
-                name: 'ipsum',
-                weight: 2
-            });
-
-            shortcutUntangler.createContext({
-                name: 'lorem',
-                weight: 2
-            });
+        it('should be triggered when there are other keys pressed at the same time in a different order that are part of the combo', function() {
+            var shortcut = jasmine.createSpy();
 
             shortcutUntangler.createShortcut({
-                name: 'foo',
-                description: 'My shortcut description',
-                key: 'e',
-                callback: function(){}
-            }, 'lorem');
-
-            shortcutUntangler.createShortcut({
-                name: 'bar',
-                description: 'My shortcut description',
-                key: 'e',
-                callback: function(){}
-            }, 'ipsum');
-
-
-            shortcutUntangler.createShortcut({
-                name: 'three',
-                description: 'My shortcut description',
-                key: 'e',
-                callback: function(){}
+                key: 'e f',
+                callback: shortcut
             });
 
-            var environmentJson = shortcutUntangler.toJSON();
+            triggerKeyDown('F');
+            triggerKeyDown('E');
 
-            expect(environmentJson['e'].name).toEqual('foo');
+            expect(shortcut).toHaveBeenCalled();
+        });
+
+        it('should be triggered when pressing key modifier down and normal key combo', function() {
+            var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                key: 'ctrl f',
+                callback: shortcut
+            });
+
+            triggerKeyDown(MODIFIER_KEY_CODES.ctrl);
+            triggerKeyDown('f');
+
+            expect(shortcut).toHaveBeenCalled();
+        });
+
+        it('should be triggered when using key modifier and normal key combo pressed in different order', function() {
+            var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                key: 'ctrl f',
+                callback: shortcut
+            });
+
+            triggerKeyDown('f');
+            triggerKeyDown(MODIFIER_KEY_CODES.ctrl);
+
+            expect(shortcut).toHaveBeenCalled();
+        });
+
+        it('should be triggered when using multiple key modifier and normal key combo', function() {
+            var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                key: 'ctrl alt f',
+                callback: shortcut
+            });
+
+            triggerKeyDown(MODIFIER_KEY_CODES.ctrl);
+            triggerKeyDown(MODIFIER_KEY_CODES.alt);
+            triggerKeyDown('f');
+
+            expect(shortcut).toHaveBeenCalled();
+        });
+
+        it('should be triggered when key modifier are part of the event when using a combo', function() {
+            var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                key: 'ctrl f',
+                callback: shortcut
+            });
+
+            triggerNativeKeyHotkey('f', null, ["ctrl"]);
+
+            expect(shortcut).toHaveBeenCalled();
+        });
+
+        it('should be triggered when using multiple key modifier are part of the event when using a combo', function() {
+            var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                key: 'ctrl alt f',
+                callback: shortcut
+            });
+
+            triggerNativeKeyHotkey('f', null, ["ctrl", "alt"]);
+
+            expect(shortcut).toHaveBeenCalled();
+        });
+
+        it('should be able to trigger shortcuts using modifier keys by themselves', function() {
+            var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                key: 'ctrl',
+                callback: shortcut
+            });
+
+            triggerNativeKeyHotkey(MODIFIER_KEY_CODES.ctrl);
+
+            expect(shortcut).toHaveBeenCalled();
+        });
+
+        it('should be able to trigger shortcuts using multiple modifier keys by themselves', function() {
+            var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                key: 'ctrl alt',
+                callback: shortcut
+            });
+
+            triggerKeyDown(MODIFIER_KEY_CODES.alt);
+            triggerKeyDown(MODIFIER_KEY_CODES.ctrl);
+
+            expect(shortcut).toHaveBeenCalled();
         });
     });
 
@@ -616,7 +763,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
@@ -628,17 +775,17 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut1',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
             shortcutUntangler.toggleDisabledState();
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             shortcutUntangler.changeEnvironment('main');
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(shortcut).not.toHaveBeenCalled();
         });
@@ -650,7 +797,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
@@ -662,17 +809,17 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut2',
-                key: 'e',
+                key: 'E',
                 callback: shortcut2
             });
 
             shortcutUntangler.toggleDisabledState(true, 'invalid');
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             shortcutUntangler.changeEnvironment('main');
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(shortcut).toHaveBeenCalled();
             expect(shortcut2).toHaveBeenCalled();
@@ -686,7 +833,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
@@ -698,7 +845,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut2',
-                key: 'e',
+                key: 'E',
                 callback: shortcut2
             });
 
@@ -710,21 +857,21 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut3',
-                key: 'e',
+                key: 'E',
                 callback: shortcut3
             });
 
             shortcutUntangler.toggleDisabledState(true, ['foo', 'bar']);
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             shortcutUntangler.changeEnvironment('foo');
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             shortcutUntangler.changeEnvironment('main');
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(shortcut).toHaveBeenCalled();
             expect(shortcut2).not.toHaveBeenCalled();
@@ -739,7 +886,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
@@ -751,7 +898,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut2',
-                key: 'e',
+                key: 'E',
                 callback: shortcut2
             });
 
@@ -763,21 +910,21 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut3',
-                key: 'e',
+                key: 'E',
                 callback: shortcut3
             });
 
             shortcutUntangler.toggleDisabledState(true, ['invalid1', 'invalid2']);
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             shortcutUntangler.changeEnvironment('foo');
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             shortcutUntangler.changeEnvironment('main');
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(shortcut).toHaveBeenCalled();
             expect(shortcut2).toHaveBeenCalled();
@@ -791,7 +938,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
@@ -803,13 +950,13 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut2
             }, 'other');
 
             shortcutUntangler.toggleDisabledState(true, 'main', 'other');
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(shortcut2).not.toHaveBeenCalled();
             expect(shortcut).toHaveBeenCalled();
@@ -822,7 +969,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
@@ -834,13 +981,13 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut2
             }, 'other');
 
             shortcutUntangler.toggleDisabledState(true, 'main', 'invalid');
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(shortcut2).toHaveBeenCalled();
             expect(shortcut).not.toHaveBeenCalled();
@@ -854,7 +1001,7 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
@@ -871,20 +1018,20 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'shortcut2',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut2
             }, 'other');
 
             shortcutUntangler.createShortcut({
                 name: 'shortcut3',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut2
             }, 'foo');
 
             shortcutUntangler.toggleDisabledState(true, 'main', ['other', 'foo']);
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(shortcut3).not.toHaveBeenCalled();
             expect(shortcut2).not.toHaveBeenCalled();
@@ -903,21 +1050,21 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             }, 'other');
 
             shortcutUntangler.createShortcut({
                 name: 'My shortcut 2',
                 description: 'My shortcut description',
-                key: 'f',
+                key: 'F',
                 callback: shortcut2
             }, 'other');
 
-            shortcutUntangler.toggleDisabledState(true, 'main', 'other', 'e');
+            shortcutUntangler.toggleDisabledState(true, 'main', 'other', 'E');
 
-            triggerNativeKeyHotkey('e');
-            triggerNativeKeyHotkey('f');
+            triggerNativeKeyHotkey('E');
+            triggerNativeKeyHotkey('F');
 
             expect(shortcut).not.toHaveBeenCalled();
             expect(shortcut2).toHaveBeenCalled();
@@ -935,21 +1082,21 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             }, 'other');
 
             shortcutUntangler.createShortcut({
                 name: 'My shortcut 2',
                 description: 'My shortcut description',
-                key: 'f',
+                key: 'F',
                 callback: shortcut2
             }, 'other');
 
             shortcutUntangler.toggleDisabledState(true, 'main', 'other', 'invalid');
 
-            triggerNativeKeyHotkey('e');
-            triggerNativeKeyHotkey('f');
+            triggerNativeKeyHotkey('E');
+            triggerNativeKeyHotkey('F');
 
             expect(shortcut).toHaveBeenCalled();
             expect(shortcut2).toHaveBeenCalled();
@@ -967,21 +1114,21 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             }, 'other');
 
             shortcutUntangler.createShortcut({
                 name: 'My shortcut 2',
                 description: 'My shortcut description',
-                key: 'f',
+                key: 'F',
                 callback: shortcut2
             }, 'other');
 
             shortcutUntangler.toggleDisabledState(true, 'main', 'other', ['invalid1', 'invalid2']);
 
-            triggerNativeKeyHotkey('e');
-            triggerNativeKeyHotkey('f');
+            triggerNativeKeyHotkey('E');
+            triggerNativeKeyHotkey('F');
 
             expect(shortcut).toHaveBeenCalled();
             expect(shortcut2).toHaveBeenCalled();
@@ -999,21 +1146,21 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             }, 'other');
 
             shortcutUntangler.createShortcut({
                 name: 'My shortcut 2',
                 description: 'My shortcut description',
-                key: 'f',
+                key: 'F',
                 callback: shortcut2
             }, 'other');
 
-            shortcutUntangler.toggleDisabledState(true, 'main', 'other', ['e', 'f']);
+            shortcutUntangler.toggleDisabledState(true, 'main', 'other', ['E', 'F']);
 
-            triggerNativeKeyHotkey('e');
-            triggerNativeKeyHotkey('f');
+            triggerNativeKeyHotkey('E');
+            triggerNativeKeyHotkey('F');
 
             expect(shortcut).not.toHaveBeenCalled();
             expect(shortcut2).not.toHaveBeenCalled();
@@ -1025,33 +1172,73 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             shortcutUntangler.createShortcut({
                 name: 'My shortcut',
                 description: 'My shortcut description',
-                key: 'e',
+                key: 'E',
                 callback: shortcut
             });
 
             shortcutUntangler.toggleDisabledState();
             shortcutUntangler.toggleDisabledState();
 
-            triggerNativeKeyHotkey('e');
+            triggerNativeKeyHotkey('E');
 
             expect(shortcut).toHaveBeenCalled();
         });
     });
 });
 
-function triggerNativeKeyHotkey(keyCode, el) {
-    var eventObj = document.createEventObject ?  document.createEventObject() : document.createEvent('Events');
+function addModifier(event, modifierArray) {
+    if(Array.isArray(modifierArray)) {
+        for(var i=0, len=modifierArray.length; i<len; i++) {
+            var modifier = modifierArray[i];
 
+            if(MODIFIER_KEY_CODES[modifier]) {
+                event[modifier.toLowerCase() + "Key"] = true;
+            }
+        }
+    }
+
+    return event;
+}
+
+function triggerKeyDown(keyCode, el, modifier) {
     el = el || document.getElementsByTagName('body')[0];
+
+    var eventObj = document.createEventObject ?  document.createEventObject() : document.createEvent('Events');
 
     if(eventObj.initEvent){
       eventObj.initEvent('keydown', true, true);
     }
 
-    keyCode = keyCode.charCodeAt(0);
+    keyCode = typeof keyCode === 'number' ? keyCode : keyCode.toUpperCase().charCodeAt(0);
 
     eventObj.keyCode = keyCode;
     eventObj.which = keyCode;
 
+    eventObj = addModifier(eventObj, modifier);
+
     el.dispatchEvent ? el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
+}
+
+function triggerKeyUp(keyCode, el, modifier) {
+    el = el || document.getElementsByTagName('body')[0];
+
+    var eventObj = document.createEventObject ?  document.createEventObject() : document.createEvent('Events');
+
+    if(eventObj.initEvent){
+      eventObj.initEvent('keyup', true, true);
+    }
+
+    keyCode = typeof keyCode === 'number' ? keyCode : keyCode.toUpperCase().charCodeAt(0);
+
+    eventObj.keyCode = keyCode;
+    eventObj.which = keyCode;
+
+    eventObj = addModifier(eventObj, modifier);
+
+    el.dispatchEvent ? el.dispatchEvent(eventObj) : el.fireEvent('onkeyup', eventObj);
+}
+
+function triggerNativeKeyHotkey(keyCode, el, modifier) {
+    triggerKeyDown(keyCode, el, modifier);
+    triggerKeyUp(keyCode, el, modifier);
 }
