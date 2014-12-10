@@ -188,7 +188,7 @@
 
         for (var i = env.context.length - 1; i >= 0; i--) {
             var _context = env.context[i].shortcut;
-            var _shotcut;
+            var _shortcut;
 
             for (_shortcut in _context) {
                 var shortcutInfo = _context[_shortcut];
@@ -208,6 +208,10 @@
 
     var Shortcut = {
         getKeyName: function(key) {
+            if(typeof key === 'number') {
+                key = MODFIER_KEY_CODES[key];
+            }
+
             if(key.indexOf(' ') !== -1) { // cleans multiple spaces and makes sure that multiple keys have same unique key idependently of the order they pass as arguments
                 key = key.toLowerCase().split(" ").filter(function(e) {
                     // removes 0, null, undefined, ""
@@ -404,6 +408,10 @@
                  */
                 keyUp: function(key) {
                     delete pressedKeys[key];
+                },
+
+                clear: function() {
+                    pressedKeys = {};
                 }
             };
         })();
@@ -559,13 +567,17 @@
             'name': active_environment
         });
 
+        rootElement.addEventListener('blur', function(e) {
+            keyHandler.clear();
+        });
+
         rootElement.addEventListener('keyup', function(e) {
             var key = e.keyCode ? e.keyCode : e.which;
             var shortcutKey = typeof MODFIER_KEY_CODES[key] !== 'undefined' ?  MODFIER_KEY_CODES[key].toUpperCase() : String.fromCharCode(key);
 
             for(var k=0, len=KEY_MODIFIERS.length; k<len; k++) {
                 var keymod = KEY_MODIFIERS[k];
-                if(!event[keymod + 'Key']) {
+                if(!e[keymod + 'Key']) {
                     keyHandler.keyUp(keymod.toUpperCase());
                 }
             }
@@ -584,7 +596,7 @@
             if(KEY_MODIFIERS.indexOf(shortcutKey.toLowerCase()) === -1) {
                 for(var k=0, len=KEY_MODIFIERS.length; k<len; k++) {
                     var keymod = KEY_MODIFIERS[k];
-                    if(event[keymod + 'Key']) {
+                    if(e[keymod + 'Key']) {
                         keyHandler.keyDown(keymod.toUpperCase());
                     }
                 }
@@ -595,7 +607,11 @@
             // loop in all context backwards searching for the key
             for (var i = activeEnvironment.context.length - 1; i >= 0; i--) {
                 var _shortcut = activeEnvironment.context[i].shortcut[shortcut];
+
                 if(_shortcut && !_shortcut.disabled)  {
+                    e.preventDefault();
+                    e.stopPropagation();
+
                     if(debug) {
                         printDebugConsoleMessage(_shortcut);
                     }
