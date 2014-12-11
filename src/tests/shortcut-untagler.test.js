@@ -132,6 +132,34 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             expect(shortcut2).toHaveBeenCalled();
         });
 
+        it('should reset keys when rootElement loses focus', function() {
+            var shortcut = jasmine.createSpy();
+            var shortcutBoundDiv;
+
+            body.innerHTML = '<div id="shortcutBoundDiv"></div>';
+
+            shortcutBoundDiv = document.getElementById('shortcutBoundDiv');
+
+            shortcutUntangler = new ShortcutUntangler({
+                rootElement: shortcutBoundDiv
+            });
+
+            shortcutUntangler.createShortcut({
+                name: 'My shortcut',
+                description: 'My shortcut description',
+                key: 'E F',
+                callback: shortcut
+            });
+
+            triggerKeyDown('E', shortcutBoundDiv);
+
+            triggerNativeBlurOnElement(shortcutBoundDiv);
+
+            triggerKeyDown('F', shortcutBoundDiv);
+
+            expect(shortcut).not.toHaveBeenCalled();
+        });
+
         it('should allow to overwritte the debug enabled state', function() {
             shortcutUntangler = new ShortcutUntangler({
                 debug: true
@@ -1249,6 +1277,18 @@ function triggerKeyUp(keyCode, el, modifier) {
     eventObj = addModifier(eventObj, modifier);
 
     el.dispatchEvent ? el.dispatchEvent(eventObj) : el.fireEvent('onkeyup', eventObj);
+}
+
+function triggerNativeBlurOnElement(el) {
+    el = el || document.getElementsByTagName('body')[0];
+
+    var eventObj = document.createEventObject ?  document.createEventObject() : document.createEvent('Events');
+
+    if(eventObj.initEvent){
+      eventObj.initEvent('blur', true, true);
+    }
+
+    el.dispatchEvent ? el.dispatchEvent(eventObj) : el.fireEvent('onblur', eventObj);
 }
 
 function triggerNativeKeyHotkey(keyCode, el, modifier) {
