@@ -72,6 +72,19 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
             expect(environmentJson).not.toEqual({});
         });
 
+        it('should allow to create shortcuts sending the keyCode number', function() {
+            var shortcut = jasmine.createSpy();
+
+            shortcutUntangler.createShortcut({
+                key: 69,
+                callback: shortcut
+            });
+
+            triggerNativeKeyHotkey('e');
+
+            expect(shortcut).toHaveBeenCalled();
+        });
+
         it('should allow to overwritte the default context name', function() {
             shortcutUntangler = new ShortcutUntangler({
                 mainContext: 'foo'

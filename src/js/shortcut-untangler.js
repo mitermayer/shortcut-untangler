@@ -209,7 +209,7 @@
     var Shortcut = {
         getKeyName: function(key) {
             if(typeof key === 'number') {
-                key = MODFIER_KEY_CODES[key];
+                key = MODFIER_KEY_CODES[key] || String.fromCharCode(key);
             }
 
             if(key.indexOf(' ') !== -1) { // cleans multiple spaces and makes sure that multiple keys have same unique key idependently of the order they pass as arguments
@@ -567,7 +567,8 @@
             'name': active_environment
         });
 
-        rootElement.addEventListener('blur', function(e) {
+        //  we need to make sure that we clear the keys once we no longer are focused on the rootelement
+        rootElement.addEventListener('blur', function() {
             keyHandler.clear();
         });
 
