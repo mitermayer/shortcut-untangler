@@ -37,6 +37,11 @@ module.exports = function(config) {
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
     reporters: ['progress', 'coverage'],
 
+    // optionally, configure the reporter
+    coverageReporter: {
+      type : 'html',
+      dir : process.env.CIRCLE_ARTIFACTS || '' + 'coverage/'
+    },
 
     // web server port
     port: 9876,
