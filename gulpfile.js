@@ -1,14 +1,17 @@
-var karma = require('gulp-karma');
-var jshint = require('gulp-jshint');
 var gulp = require('gulp');
+
 var concat = require('gulp-concat');
+var jshint = require('gulp-jshint');
+var karma = require('gulp-karma');
 var stripDebug = require('gulp-strip-debug');
-var uglify = require('gulp-uglify');
 var stylish = require('jshint-stylish');
+var uglify = require('gulp-uglify');
 
 var srcFiles = ['src/js/**/*.js'];
 var testFiles = ['src/tests/**/*.js'];
 var allFiles = srcFiles.concat(testFiles);
+
+
 
 // JS concat, strip debugging and minify
 gulp.task('scripts', function() {
@@ -20,13 +23,13 @@ gulp.task('scripts', function() {
 });
 
 gulp.task('lint', function() {
-    return gulp.src(allFiles)
+    return gulp.src(srcFiles)
         .pipe(jshint())
         .pipe(jshint.reporter(stylish))
         .pipe(jshint.reporter('fail'))
 });
 
-gulp.task('test', function() {
+gulp.task('utest', function() {
     // Be sure to return the stream
     return gulp.src(allFiles)
         .pipe(karma({
@@ -46,14 +49,10 @@ gulp.task('dev', function() {
             browsers: ['PhantomJS'],
             action: 'watch'
         }))
-
-    gulp.watch(allFiles, function() {
-        gulp.src(allFiles)
-            .pipe(jshint())
-            .pipe(jshint.reporter(stylish))
-    });
 });
 
-gulp.task('default', ['lint', 'test'], function() {
-    console.log("Default task");
-});
+// used on pre-commit
+gulp.task('default', ['lint', 'utest', 'scripts']);
+
+// used for testing
+gulp.task('test', ['lint', 'utest']);

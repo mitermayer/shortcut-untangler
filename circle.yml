@@ -1,0 +1,6 @@
+test:
+  pre:
+    - npm install -g karma
+    - npm install -g gulp
+  override:
+    - npm test
