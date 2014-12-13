@@ -6,4 +6,4 @@ test:
   override:
     - npm test
   post:
-    - COVERALLS_SERVICE_NAME=circleci && COVERALLS_REPO_TOKEN=vndJ1K12F91n0HswPDxz3fqfSFug5QQ0t && COVERALLS_GIT_COMMIT=$CIRCLE_SHA1 && COVERALLS_GIT_BRANCH=$CIRCLE_BRANCH && find "$CIRCLE_ARTIFACTS" -name lcov.info -exec cat {} \; | coveralls
+    - export COVERALLS_SERVICE_NAME=circleci && export COVERALLS_REPO_TOKEN=8wh8mDCGtNDvPXg47eLKd1EH5zJHvmfdj && export COVERALLS_GIT_COMMIT=$CIRCLE_SHA1 && export COVERALLS_GIT_BRANCH=$CIRCLE_BRANCH && find "$CIRCLE_ARTIFACTS" -name lcov.info -exec cat {} \; | coveralls
