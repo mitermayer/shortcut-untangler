@@ -1,3 +1,7 @@
+machine:
+    environment:
+        COVERALLS_REPO_TOKEN: vndJ1K12F91n0HswPDxz3fqfSFug5QQ0t
+
 test:
   pre:
     - npm install -g karma

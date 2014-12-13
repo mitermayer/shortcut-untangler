@@ -11,8 +11,6 @@ var srcFiles = ['src/js/**/*.js'];
 var testFiles = ['src/tests/**/*.js'];
 var allFiles = srcFiles.concat(testFiles);
 
-
-
 // JS concat, strip debugging and minify
 gulp.task('scripts', function() {
     gulp.src(srcFiles)
