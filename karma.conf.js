@@ -40,7 +40,8 @@ module.exports = function(config) {
     // optionally, configure the reporter
     coverageReporter: {
       type : 'lcov',
-      dir : process.env.CIRCLE_ARTIFACTS || '' + 'coverage/'
+      //dir : process.env.CIRCLE_ARTIFACTS || '' + 'coverage/'
+      dir : 'coverage/'
     },
 
     // web server port
