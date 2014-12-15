@@ -1,0 +1,80 @@
+<html>
+  <head>
+    <head>Pefermance test between versions</head>
+  </head>
+  <body>
+    <h1>version 1.0.0a vs Dev version</h1>
+    <script>
+        function forceSyncDownload(src) {
+          // get some kind of XMLHttpRequest
+          var xhrObj = new XMLHttpRequest();
+          // open and send a synchronous request
+          xhrObj.open('GET', src, false);
+          xhrObj.send('');
+          // add the returned content to a newly created script tag
+          var se = document.createElement('script');
+          se.type = "text/javascript";
+          se.text = xhrObj.responseText;
+          document.getElementsByTagName('head')[0].appendChild(se);
+        }
+    </script>
+    <script>
+      forceSyncDownload("version/v1.0.0a/shortcut-untangler.js");
+    </script>
+    <script>
+      forceSyncDownload("version/dev/shortcut-untangler.js");
+    </script>
+    <script src="lib/JSLitmus.js"></script>
+    <script src="helpers.js"></script>
+    <script>
+        var shortcutUntangleA = new ShortcutUntangleA();
+        var shortcutUntangleB = new ShortcutUntangleB();
+        var Acalled = false;
+        var Bcalled = false;
+
+        var NUM_OF_CONTEXT = 5000;
+
+        for(var i=0; i<NUM_OF_CONTEXT; i++) {
+            shortcutUntangleA.createContext({
+                name: 'foo' + i,
+                description: 'should error since should already exit'
+            });
+
+            shortcutUntangleB.createContext({
+                name: 'foo' + i,
+                description: 'should error since should already exit'
+            });
+
+            shortcutUntangleA.createShortcut({
+              name: 'My shortcut',
+              description: 'My shortcut description',
+              key: 'A',
+              callback: function() {
+                Acalled = true;
+              }
+            }, 'foo' + i);
+
+            shortcutUntangleB.createShortcut({
+              name: 'My shortcut',
+              description: 'My shortcut description',
+              key: 'B',
+              callback: function() {
+                Bcalled = true;
+              }
+            }, 'foo' + i);
+        }
+
+        JSLitmus.test('Testing 1.0.0a version', function() {
+          triggerNativeKeyHotkey('A');
+          while(Acalled !== true) {}
+          Acalled = false;
+        });
+
+        JSLitmus.test('Testing dev version', function() {
+          triggerNativeKeyHotkey('B');
+          while(Bcalled !== true) {}
+          Bcalled = false;
+        });
+    </script>
+  </body>
+</html>

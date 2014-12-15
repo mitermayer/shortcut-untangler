@@ -14,7 +14,7 @@ var allFiles = srcFiles.concat(testFiles);
 // JS concat, strip debugging and minify
 gulp.task('scripts', function() {
     gulp.src(srcFiles)
-        .pipe(concat('shortcutUntangler.min.js'))
+        .pipe(concat('shortcut-untangler.min.js'))
         .pipe(stripDebug())
         .pipe(uglify())
         .pipe(gulp.dest('./'));
