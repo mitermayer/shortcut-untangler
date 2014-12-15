@@ -796,6 +796,20 @@ describe('Shortcut Untangler tests', function() { var shortcutUntangler;
 
             expect(shortcut).toHaveBeenCalled();
         });
+
+        //it('should be triggered when using combination combo keys', function() {
+        //    var shortcut = jasmine.createSpy();
+
+        //    shortcutUntangler.createShortcut({
+        //        key: ['ctrl a', 'ctrl f'],
+        //        callback: shortcut
+        //    });
+
+        //    triggerNativeKeyHotkey('a', null, ["ctrl"]);
+        //    triggerNativeKeyHotkey('f', null, ["ctrl"]);
+
+        //    expect(shortcut).toHaveBeenCalled();
+        //});
     });
 
     describe('Controls', function() {
