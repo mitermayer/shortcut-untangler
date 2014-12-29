@@ -1,6 +1,6 @@
 (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-        define('ShortcutUntangler', [], factory);
+        define(factory);
     } else {
         root.ShortcutUntangler = factory();
     }
@@ -383,7 +383,7 @@
         }
     };
 
-    return function ShortcutUntangler(option) {
+    var ShortcutUntangler = function(option) {
         option = option || {};
 
         var defaultEnvironmentName = option.mainEnvironment || 'main';
@@ -648,4 +648,6 @@
             }
         }, false);
     };
+
+    return ShortcutUntangler;
 }));
