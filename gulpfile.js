@@ -10,7 +10,7 @@ var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
 
 var srcFiles = ['src/js/**/*.js'];
-var testFiles = ['src/tests/integration/**/*.js'];
+var testFiles = ['src/tests/unit/**/*.js'];
 var allFiles = srcFiles.concat(testFiles);
 
 
