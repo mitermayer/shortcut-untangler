@@ -1,8 +1,8 @@
 (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-        define('ShortcutUntangler', [], factory);
+        define(factory);
     } else {
-        root.ShortcutUntangleA = factory();
+        root.ShortcutUntangler = factory();
     }
 }(this, function() {
 
@@ -76,6 +76,16 @@
       220: "\\",
       221: "]",
       222: "'"
+    };
+
+    /**
+     * Checks to see if Object is of type string
+     *
+     * @param {Object} match
+     * @return {Boolean}
+     */
+    var isNumber = function(match) {
+        return typeof match === 'number';
     };
 
     /**
@@ -164,7 +174,7 @@
         var targetContextIndex = 0; // defaults to 0 since there will always be at least one context
         var _context;
 
-        for( var i=0, len=contextArr.length; i<len; i++) {
+            for( var i=0, len=contextArr.length; i<len; i++) {
             _context = contextArr[i];
 
             if(_context.name === contextName){
@@ -208,11 +218,17 @@
 
     var Shortcut = {
         getKeyName: function(key) {
-            if(typeof key === 'number') {
-                key = MODFIER_KEY_CODES[key] || String.fromCharCode(key);
-            }
+            if(isArray(key)) {
+                var _key = [];
 
-            if(key.indexOf(' ') !== -1) { // cleans multiple spaces and makes sure that multiple keys have same unique key idependently of the order they pass as arguments
+                for(var i=0, len=key.length; i<len; i++) {
+                    _key.push(this.getKeyName(key[i]));
+                }
+
+                key = _key.join(" ");
+            } else if(isNumber(key)) {
+                key = MODFIER_KEY_CODES[key] || String.fromCharCode(key);
+            } else if(key.indexOf(' ') !== -1) { // cleans multiple spaces and makes sure that multiple keys have same unique key idependently of the order they pass as arguments
                 key = key.toLowerCase().split(" ").filter(function(e) {
                     // removes 0, null, undefined, ""
                     return e;
@@ -367,7 +383,7 @@
         }
     };
 
-    return function ShortcutUntangler(option) {
+    var ShortcutUntangler = function(option) {
         option = option || {};
 
         var defaultEnvironmentName = option.mainEnvironment || 'main';
@@ -376,6 +392,9 @@
         var debug = false || option.debug;
         var rootElement = option.rootElement || document.getElementsByTagName('body')[0];
         var _environments = {};
+        var CACHE = {
+            ENVIRONMENT: {}
+        };
 
         var keyHandler = (function() {
             var pressedKeys = {};
@@ -458,6 +477,7 @@
 
                     if(typeof env !== 'undefined') {
                         env.toggleDisabledState(state, context, shortcut);
+                        CACHE.ENVIRONMENT[env.name] = this.toJSON(env.name);
                     }
                 }
             } else if(isString(environment)) {
@@ -465,10 +485,12 @@
 
                 if(typeof env !== 'undefined') {
                     env.toggleDisabledState(state, context, shortcut);
+                    CACHE.ENVIRONMENT[env.name] = this.toJSON(env.name);
                 }
             } else {
                 for(env in _environments) {
                     _environments[env].toggleDisabledState(state, context, shortcut);
+                    CACHE.ENVIRONMENT[env] = this.toJSON(env);
                 }
             }
         };
@@ -524,6 +546,8 @@
             newContext = Context.create(option);
 
             contextArr.splice(getContextPlacementIndex(contextArr, newContext), 0, newContext);
+
+            CACHE.ENVIRONMENT[targetEnvironment.name] = this.toJSON(targetEnvironment.name);
         };
 
         this.createEnvironment = function(option, targetBaseEnv) {
@@ -546,12 +570,14 @@
                 // main will always be the first context
                 newEnv.context[0].shortcut = this.toJSON(rootEnv);
             }
+
+            CACHE.ENVIRONMENT[newEnv.name] = this.toJSON(newEnv.name);
         };
 
-        this.createShortcut = function(option, contextName) {
-            var activeEnvironment = _environments[this.getActiveEnvironment()];
-            var targetContextIndex = getContextIndex(activeEnvironment.context, contextName);
-            var shortcutContext = activeEnvironment.context[targetContextIndex].shortcut;
+        this.createShortcut = function(option, contextName, environmentName) {
+            var targetEnvironment = _environments[environmentName || this.getActiveEnvironment()];
+            var targetContextIndex = getContextIndex(targetEnvironment.context, contextName);
+            var shortcutContext = targetEnvironment.context[targetContextIndex].shortcut;
 
             // allows support for multiple keys, and make sure that the order of keys pressed won't matter
             option.key = Shortcut.getKeyName(option.key);
@@ -560,6 +586,8 @@
             Shortcut.validate(option, shortcutContext);
 
             shortcutContext[option.key] = Shortcut.create(option);
+
+            CACHE.ENVIRONMENT[targetEnvironment.name] = this.toJSON(targetEnvironment.name);
         };
 
         // create a new environment
@@ -589,8 +617,9 @@
         rootElement.addEventListener('keydown', function(e) {
             var key = e.keyCode ? e.keyCode : e.which;
             var shortcutKey = typeof MODFIER_KEY_CODES[key] !== 'undefined' ?  MODFIER_KEY_CODES[key].toUpperCase() : String.fromCharCode(key);
-            var activeEnvironment = _environments[active_environment];
+            var activeEnvironment = CACHE.ENVIRONMENT[active_environment];
             var shortcut;
+            var _shortcut;
 
             keyHandler.keyDown(shortcutKey);
 
@@ -605,22 +634,20 @@
 
             shortcut = keyHandler.getKeys();
 
-            // loop in all context backwards searching for the key
-            for (var i = activeEnvironment.context.length - 1; i >= 0; i--) {
-                var _shortcut = activeEnvironment.context[i].shortcut[shortcut];
+            _shortcut = activeEnvironment[shortcut];
 
-                if(_shortcut && !_shortcut.disabled)  {
-                    e.preventDefault();
-                    e.stopPropagation();
+            if(_shortcut) {
+                e.preventDefault();
+                e.stopPropagation();
 
-                    if(debug) {
-                        printDebugConsoleMessage(_shortcut);
-                    }
-
-                    _shortcut.callback(e, arguments);
-                    break;
+                if(debug) {
+                    printDebugConsoleMessage(_shortcut);
                 }
+
+                _shortcut.callback(e, arguments);
             }
         }, false);
     };
+
+    return ShortcutUntangler;
 }));
