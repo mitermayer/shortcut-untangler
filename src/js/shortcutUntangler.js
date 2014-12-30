@@ -1,6 +1,6 @@
 (function(root, factory) {
     if (typeof define === 'function' && define.amd) {
-        define('ShortcutUntangler', [], factory);
+        define(factory);
     } else {
         root.ShortcutUntangler = factory();
     }
