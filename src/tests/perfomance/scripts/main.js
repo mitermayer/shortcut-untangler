@@ -1,7 +1,7 @@
 require.config({
     paths: {
-        latestStableRelease: '../version/v1.0.0a/shortcutUntangler',
-        developmentRelease: '../version/shortcutUntangler'
+        latestStableRelease: 'https://rawgit.com/mitermayer/shortcut-untangler/master/shortcutUntangler.min',
+        developmentVersion: '../../../js/shortcutUntangler'
     }
 });
 
@@ -10,15 +10,15 @@ define([
     'lib/jslitmus-amd',
     'lib/utils',
     'latestStableRelease',
-    'developmentRelease'
+    'developmentVersion'
 ],function(
     JSLitmus,
     Utils,
     latestStableRelease,
-    developmentRelease
+    developmentVersion
 ) {
     var latestStableRelease = new latestStableRelease();
-    var developmentRelease = new developmentRelease();
+    var developmentVersion = new developmentVersion();
     var Acalled = false;
     var Bcalled = false;
 
@@ -27,42 +27,36 @@ define([
     for(var i=0; i<NUM_OF_CONTEXT; i++) {
         latestStableRelease.createContext({
             name: 'foo' + i,
-            description: 'should error since should already exit'
         });
 
-        developmentRelease.createContext({
-            name: 'foo' + i,
-            description: 'should error since should already exit'
+        developmentVersion.createContext({
+            name: 'foo' + i
         });
 
         latestStableRelease.createShortcut({
-          name: 'My shortcut',
-          description: 'My shortcut description',
-          key: 'A',
+          key: 'A S D F O P',
           callback: function() {
             Acalled = true;
           }
         }, 'foo' + i);
 
-        developmentRelease.createShortcut({
-          name: 'My shortcut',
-          description: 'My shortcut description',
-          key: 'B',
+        developmentVersion.createShortcut({
+          key: 'B C N M G H',
           callback: function() {
             Bcalled = true;
           }
         }, 'foo' + i);
     }
 
-    JSLitmus.test('Testing 1.0.0a version', function() {
-      Utils.triggerNativeKeyHotkey('A');
-      while(Acalled !== true) {}
-      Acalled = false;
-    });
-
-    JSLitmus.test('Testing dev version', function() {
-      Utils.triggerNativeKeyHotkey('B');
+    JSLitmus.test('Development Version', function() {
+      Utils.triggerNativeKeyHotkey(['B', 'C', 'N', 'M', 'G', 'H']);
       while(Bcalled !== true) {}
       Bcalled = false;
+    });
+
+    JSLitmus.test('Latest Release', function() {
+      Utils.triggerNativeKeyHotkey(['A', 'S', 'D', 'F', 'O', 'P']);
+      while(Acalled !== true) {}
+      Acalled = false;
     });
 });

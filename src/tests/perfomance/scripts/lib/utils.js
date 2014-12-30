@@ -71,8 +71,18 @@ define(function() {
     }
 
     function triggerNativeKeyHotkey(keyCode, el, modifier) {
-        triggerKeyDown(keyCode, el, modifier);
-        triggerKeyUp(keyCode, el, modifier);
+        if(Array.isArray(keyCode)) {
+            var keys = keyCode.length;
+            for(var i=0; i<keys; i++) {
+                triggerKeyDown(keyCode[i], el, modifier);
+            }
+            for(var k=0; k<keys; k++) {
+                triggerKeyUp(keyCode[k], el, modifier);
+            }
+        } else {
+            triggerKeyDown(keyCode, el, modifier);
+            triggerKeyUp(keyCode, el, modifier);
+        }
     }
 
     return {
