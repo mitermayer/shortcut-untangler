@@ -1,6 +1,6 @@
 require.config({
     paths: {
-        latestStableRelease: 'https://rawgit.com/mitermayer/shortcut-untangler/master/shortcutUntangler.min',
+        latestStableRelease: 'https://rawgit.com/mitermayer/shortcut-untangler/master/src/js/shortcutUntangler',
         developmentVersion: '../../../js/shortcutUntangler'
     }
 });
@@ -17,8 +17,16 @@ define([
     latestStableRelease,
     developmentVersion
 ) {
-    var latestStableRelease = new latestStableRelease();
-    var developmentVersion = new developmentVersion();
+    var latestStableReleaseFixture = document.getElementById('latestStableRelease');
+    var developmentVersionFixture = document.getElementById('developmentVersion');
+
+    var latestStableRelease = new latestStableRelease({
+        rootElement: latestStableReleaseFixture
+    });
+    var developmentVersion = new developmentVersion({
+        rootElement: developmentVersionFixture
+    });
+
     var Acalled = false;
     var Bcalled = false;
 
@@ -48,15 +56,15 @@ define([
         }, 'foo' + i);
     }
 
-    JSLitmus.test('Development Version', function() {
-      Utils.triggerNativeKeyHotkey(['B', 'C', 'N', 'M', 'G', 'H']);
-      while(Bcalled !== true) {}
-      Bcalled = false;
-    });
-
     JSLitmus.test('Latest Release', function() {
-      Utils.triggerNativeKeyHotkey(['A', 'S', 'D', 'F', 'O', 'P']);
+      Utils.triggerNativeKeyHotkey(['A', 'S', 'D', 'F', 'O', 'P'], latestStableReleaseFixture);
       while(Acalled !== true) {}
       Acalled = false;
+    });
+
+    JSLitmus.test('Development Version', function() {
+      Utils.triggerNativeKeyHotkey(['B', 'C', 'N', 'M', 'G', 'H'], developmentVersionFixture);
+      while(Bcalled !== true) {}
+      Bcalled = false;
     });
 });
