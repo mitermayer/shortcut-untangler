@@ -15,22 +15,19 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'src/js/*.js',
+      'dist/shortcutUntangler.js',
       'src/tests/**/*test.js'
     ],
-
 
     // list of files to exclude
     exclude: [
     ],
 
-
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'src/js/**/*.js': ['coverage']
+        'dist/shortcutUntangler.js': ['coverage']
     },
-
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
@@ -40,12 +37,12 @@ module.exports = function(config) {
     // optionally, configure the reporter
     coverageReporter: {
       type : 'lcov',
-      dir : process.env.CIRCLE_ARTIFACTS || '' + 'coverage/'
+      dir : process.env.CIRCLE_ARTIFACTS || '' + 'coverage/integration/'
     },
 
     // the default configuration
     junitReporter: {
-      outputFile: 'jasmine/junit.xml'
+      outputFile: 'jasmine/integration/junit.xml'
     },
 
     // web server port

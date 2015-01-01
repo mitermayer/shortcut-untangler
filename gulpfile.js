@@ -1,22 +1,47 @@
 var gulp = require('gulp');
 var del = require('del');
+var fs = require('fs');
 
+var amdclean  = require('gulp-amdclean');
 var concat = require('gulp-concat');
 var jshint = require('gulp-jshint');
 var karma = require('gulp-karma');
+var rjs = require('gulp-requirejs');
+var sourcemaps = require('gulp-sourcemaps');
 var stripDebug = require('gulp-strip-debug');
 var stylish = require('jshint-stylish');
-var sourcemaps = require('gulp-sourcemaps');
 var uglify = require('gulp-uglify');
+
 
 var srcFiles = ['src/js/**/*.js'];
 var testFiles = ['src/tests/unit/**/*.js'];
 var allFiles = srcFiles.concat(testFiles);
 
 
-var DIST = 'dist/';
+var DIST = './dist/';
 var MIN_FILE = 'shortcutUntangler.min.js';
 var SCRIPT_FILE= 'shortcutUntangler.js';
+
+gulp.task('build', function() {
+    var license = '/*\n' + fs.readFileSync('LICENSE', 'utf8') + '*/\n';
+    var startFragment = fs.readFileSync('src/parts/umd.frag', 'utf8');
+    var endFragment = fs.readFileSync('src/parts/umd-end.frag', 'utf8');
+
+    rjs({
+        name: 'main',
+        baseUrl: 'src/js/',
+        out: SCRIPT_FILE
+    })
+    .pipe(amdclean.gulp({
+       wrap: {
+           start: license + startFragment,
+           end: endFragment
+       },
+      prefixMode: 'standard'
+      // some other options
+    }))
+    .pipe(gulp.dest(DIST)); // pipe it to the output DIR
+});
 
 gulp.task('clean', function(cb) {
   // You can use multiple globbing patterns as you would with `gulp.src`
@@ -24,14 +49,29 @@ gulp.task('clean', function(cb) {
 });
 
 // JS concat, strip debugging and minify
-gulp.task('scripts', function() {
+gulp.task('min', function() {
+    var license = '/*\n' + fs.readFileSync('LICENSE', 'utf8') + '*/\n';
+    var startFragment = fs.readFileSync('src/parts/umd.frag', 'utf8');
+    var endFragment = fs.readFileSync('src/parts/umd-end.frag', 'utf8');
+
     del([DIST + MIN_FILE], function() {
-        gulp.src(srcFiles)
+            rjs({
+                name: 'main',
+                baseUrl: 'src/js/',
+                out: MIN_FILE
+            })
+            .pipe(amdclean.gulp({
+               wrap: {
+                   start: license + startFragment,
+                   end: endFragment
+               },
+              prefixMode: 'standard'
+              // some other options
+            }))
             .pipe(stripDebug())
             .pipe(uglify())
-            .pipe(concat(MIN_FILE))
             .pipe(sourcemaps.write())
-            .pipe(gulp.dest('dist'));
+            .pipe(gulp.dest(DIST));
     });
 });
 
@@ -42,11 +82,25 @@ gulp.task('lint', function() {
         .pipe(jshint.reporter('fail'))
 });
 
-gulp.task('utest', function() {
+// when unit tests will be enabled
+//gulp.task('utest', function() {
+//    // Be sure to return the stream
+//    return gulp.src(allFiles)
+//        .pipe(karma({
+//            configFile: 'karma-unit.conf.js',
+//            action: 'run'
+//        }))
+//        .on('error', function(err) {
+//            // Make sure failed tests cause gulp to exit non-zero
+//            throw err;
+//        });
+//});
+
+gulp.task('integration-test', ['build'], function() {
     // Be sure to return the stream
-    return gulp.src(allFiles)
+    return gulp.src([DIST + SCRIPT_FILE].concat(testFiles))
         .pipe(karma({
-            configFile: 'karma.conf.js',
+            configFile: 'karma-integration.conf.js',
             action: 'run'
         }))
         .on('error', function(err) {
@@ -58,14 +112,15 @@ gulp.task('utest', function() {
 gulp.task('dev', function() {
     gulp.src(allFiles)
         .pipe(karma({
-            configFile: 'karma.conf.js',
+            configFile: 'karma-integration.conf.js',
             browsers: ['PhantomJS'],
             action: 'watch'
         }))
 });
 
-// used on pre-commit
-gulp.task('default', ['lint', 'utest', 'scripts']);
-
 // used for testing
-gulp.task('test', ['lint', 'utest']);
+gulp.task('test', ['lint', 'integration-test']);
+
+// used on pre-commit
+gulp.task('default', ['lint', 'test', 'min']);
+

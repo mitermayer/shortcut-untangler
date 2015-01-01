@@ -1,125 +1,18 @@
-(function(root, factory) {
-    if (typeof define === 'function' && define.amd) {
-        define(factory);
-    } else {
-        root.ShortcutUntangler = factory();
-    }
-}(this, function() {
+define([
+    'lib/Utils',
+    'lib/ShortcutFactory',
+    'lib/ContextFactory',
+    'lib/EnvironmentFactory'
+],
+function(
+    Utils,
+    Shortcut,
+    Context,
+    Environment
+) {
+    var KEY_MODIFIERS = Utils.KEY_MODIFIERS;
+    var MODFIER_KEY_CODES = Utils.MODFIER_KEY_CODES;
 
-    'use scrict';
-
-    // not supporting meta at the moment
-    var KEY_MODIFIERS = ["alt", "ctrl", "shift"];
-
-    var MODFIER_KEY_CODES = {
-      8: "backspace",
-      9: "tab",
-      10: "return",
-      13: "return",
-      16: "shift",
-      17: "ctrl",
-      18: "alt",
-      19: "pause",
-      20: "capslock",
-      27: "esc",
-      32: "space",
-      33: "pageup",
-      34: "pagedown",
-      35: "end",
-      36: "home",
-      37: "left",
-      38: "up",
-      39: "right",
-      40: "down",
-      45: "insert",
-      46: "del",
-      59: ";",
-      61: "=",
-      96: "0",
-      97: "1",
-      98: "2",
-      99: "3",
-      100: "4",
-      101: "5",
-      102: "6",
-      103: "7",
-      104: "8",
-      105: "9",
-      106: "*",
-      107: "+",
-      109: "-",
-      110: ".",
-      111: "/",
-      112: "f1",
-      113: "f2",
-      114: "f3",
-      115: "f4",
-      116: "f5",
-      117: "f6",
-      118: "f7",
-      119: "f8",
-      120: "f9",
-      121: "f10",
-      122: "f11",
-      123: "f12",
-      144: "numlock",
-      145: "scroll",
-      173: "-",
-      186: ";",
-      187: "=",
-      188: ",",
-      189: "-",
-      190: ".",
-      191: "/",
-      192: "`",
-      219: "[",
-      220: "\\",
-      221: "]",
-      222: "'"
-    };
-
-    /**
-     * Checks to see if Object is of type string
-     *
-     * @param {Object} match
-     * @return {Boolean}
-     */
-    var isNumber = function(match) {
-        return typeof match === 'number';
-    };
-
-    /**
-     * Checks to see if Object is of type string
-     *
-     * @param {Object} match
-     * @return {Boolean}
-     */
-    var isString = function(match) {
-        return typeof match === 'string';
-    };
-
-    /**
-     * Checks to see if match is an array
-     *
-     * @param {Object} match
-     * @return {Boolean}
-     */
-    var isArray = function(match) {
-        return Array.isArray(match);
-    };
-
-    /**
-     * Checks to see if object has defined all the required params
-     *
-     * @param {Array} required - list of required params to be checked
-     * @param {Object} option - object to be checked
-     * @return {Boolean}
-     */
-    var hasRequiredArguments = function(required, option) {
-        return required.every(function(key) {
-            return typeof option[key] !== 'undefined';
-        });
-    };
 
     /**
      * Prints a debugging console message for a shortcut
@@ -164,29 +57,6 @@
     };
 
     /**
-     * Check what is the index for context based on the context name
-     *
-     * @param {Array[Context]} contextArr - list of existing contexts for the target environment
-     * @param {String} contextName
-     * @return {Number|0} - returns the index of a context or 0
-     */
-    var getContextIndex = function(contextArr, contextName) {
-        var targetContextIndex = 0; // defaults to 0 since there will always be at least one context
-        var _context;
-
-            for( var i=0, len=contextArr.length; i<len; i++) {
-            _context = contextArr[i];
-
-            if(_context.name === contextName){
-                targetContextIndex = i;
-                break;
-            }
-        }
-
-        return targetContextIndex;
-    };
-
-    /**
      * Get the shortcuts that are active for a particular envionment
      * by taking in consideration the context weight and the disabled status on shortcuts
      *
@@ -214,173 +84,6 @@
         }
 
         return flattenedEnv;
-    };
-
-    var Shortcut = {
-        getKeyName: function(key) {
-            if(isArray(key)) {
-                var _key = [];
-
-                for(var i=0, len=key.length; i<len; i++) {
-                    _key.push(this.getKeyName(key[i]));
-                }
-
-                key = _key.join(" ");
-            } else if(isNumber(key)) {
-                key = MODFIER_KEY_CODES[key] || String.fromCharCode(key);
-            } else if(key.indexOf(' ') !== -1) { // cleans multiple spaces and makes sure that multiple keys have same unique key idependently of the order they pass as arguments
-                key = key.toLowerCase().split(" ").filter(function(e) {
-                    // removes 0, null, undefined, ""
-                    return e;
-                }).sort().join("+");
-            }
-
-            return key.toUpperCase();
-        },
-        validate: function(option, shortcutContext) {
-            if(shortcutContext[option.key]) {
-                throw new Error('Shortcut key "' + option.key + '" is already set on context this context');
-            }
-
-            if (!option || !hasRequiredArguments(['key', 'callback'], option)) {
-                throw new Error('InvalidArguments');
-            }
-
-            return true;
-        },
-        create: function(option) {
-            var shortcut = {
-                'key': option.key,
-                'description': option.description || 'Keyboard shortcut handler triggered by key: ' + option.key,
-                'name': option.name || 'Shortcut for: ' + option.key,
-                'callback': option.callback
-            };
-
-            Object.defineProperty(shortcut, 'toggleDisabledState', {
-                    value : function(state) {
-                        state = typeof state !== 'undefined' ? state : !this.disabled;
-
-                        if(state) {
-                            this.disabled = true;
-                        } else {
-                            delete this.disabled;
-                        }
-                    },
-                    writable: false,
-                    enumerable: false,
-                    configurable: false
-            });
-
-            return shortcut;
-        }
-    };
-
-    var Context = {
-        validate: function(option, targetEnvironment) {
-            var targetEnvContext = targetEnvironment.context[getContextIndex(targetEnvironment.context, option.name)];
-
-            if(targetEnvContext && targetEnvContext.name === option.name) { // we already have a context with that name
-                throw new Error('Context name "' + option.name + '" is already set on environment "' +  targetEnvironment.name + '"');
-            }
-
-            if (!option || !hasRequiredArguments(['name'], option)) {
-                throw new Error('InvalidArguments');
-            }
-
-            return true;
-        },
-        create: function(option) {
-            var context = {
-                'shortcut': {},
-                'name': option.name,
-                'weight': option.weight || 0
-            };
-
-            Object.defineProperty(context, 'toggleDisabledState', {
-                    value : function(state, shortcut) {
-                        var scut;
-
-                        if (isArray(shortcut)) { // disable context in array
-                            for(var i=0, len=shortcut.length; i<len; i++) {
-                                scut = this.shortcut[shortcut[i]];
-
-                                if(typeof scut !== 'undefined') {
-                                    scut.toggleDisabledState(state);
-                                }
-                            }
-                        } else if(isString(shortcut)) { // disable a single context
-                            scut = this.shortcut[shortcut];
-
-                            if(typeof scut !== 'undefined') {
-                                scut.toggleDisabledState(state);
-                            }
-                        } else { // disable all shortcuts
-                            for(var shortcutKey in this.shortcut) {
-                                this.shortcut[shortcutKey].toggleDisabledState(state);
-                            }
-                        }
-                    },
-                    writable: false,
-                    enumerable: false,
-                    configurable: false
-            });
-
-            return context;
-        }
-    };
-
-    var Environment = {
-        validate: function(option, environments) {
-            if(environments[option.name]) {
-                throw new Error('Environment name "' + option.name + '" is already set');
-            }
-
-            if (!option || !hasRequiredArguments(['name'], option)) {
-                throw new Error('InvalidArguments');
-            }
-
-            return true;
-        },
-        create: function(option) {
-            var environment = {
-                'context': [],
-                'name': option.name
-            };
-
-            Object.defineProperty(environment, 'toggleDisabledState', {
-                    value : function(state, context, shortcut) {
-                        var ctx;
-
-                        if (isArray(context)) { // disable context in array
-                            for(var i=0, len=this.context.length; i<len; i++) {
-                                ctx = this.context[i];
-
-                                if(context.indexOf(ctx.name) !== -1) {
-                                    ctx.toggleDisabledState(state, shortcut);
-                                }
-                            }
-                        } else if(isString(context)) { // disable a single context
-                            for(var k=0, klen=this.context.length; k<klen; k++) {
-                                ctx = this.context[k];
-
-                                if(ctx.name === context) {
-                                    ctx.toggleDisabledState(state, shortcut);
-                                }
-                            }
-                        } else { // disable all contexts
-                            for(var j=0, jlen=this.context.length; j<jlen; j++) {
-                                ctx = this.context[j];
-                                ctx.toggleDisabledState(state, shortcut);
-                            }
-                        }
-                    },
-                    writable: false,
-                    enumerable: false,
-                    configurable: false
-            });
-
-            return environment;
-        }
     };
 
     var ShortcutUntangler = function(option) {
@@ -471,7 +174,7 @@
         this.toggleDisabledState = function(state, environment, context, shortcut) {
             var env;
 
-            if (isArray(environment)) {
+            if (Utils.isArray(environment)) {
                 for(var i=0, len = environment.length; i<len; i++) {
                     env = _environments[environment[i]];
 
@@ -480,7 +183,7 @@
                         CACHE.ENVIRONMENT[env.name] = this.toJSON(env.name);
                     }
                 }
-            } else if(isString(environment)) {
+            } else if(Utils.isString(environment)) {
                 env = _environments[environment];
 
                 if(typeof env !== 'undefined') {
@@ -513,9 +216,9 @@
         this.toJSON = function(match) {
             var ret = {};
 
-            if (isString(match)) { // particular env
+            if (Utils.isString(match)) { // particular env
                 ret = typeof _environments[match] !== 'undefined' ? flattenEnvironment(_environments[match]) : ret;
-            } else if (isArray(match)) { // we have a list of envs
+            } else if (Utils.isArray(match)) { // we have a list of envs
                 ret = [];
 
                 for(var i=0, len=match.length; i<len; i++) {
@@ -576,7 +279,7 @@
 
         this.createShortcut = function(option, contextName, environmentName) {
             var targetEnvironment = _environments[environmentName || this.getActiveEnvironment()];
-            var targetContextIndex = getContextIndex(targetEnvironment.context, contextName);
+            var targetContextIndex = Context.getContextIndex(targetEnvironment.context, contextName);
             var shortcutContext = targetEnvironment.context[targetContextIndex].shortcut;
 
             // allows support for multiple keys, and make sure that the order of keys pressed won't matter
@@ -616,7 +319,7 @@
 
         rootElement.addEventListener('keydown', function(e) {
             var key = e.keyCode ? e.keyCode : e.which;
-            var shortcutKey = typeof MODFIER_KEY_CODES[key] !== 'undefined' ?  MODFIER_KEY_CODES[key].toUpperCase() : String.fromCharCode(key);
+            var shortcutKey = typeof Utils.MODFIER_KEY_CODES[key] !== 'undefined' ?  Utils.MODFIER_KEY_CODES[key].toUpperCase() : String.fromCharCode(key);
             var activeEnvironment = CACHE.ENVIRONMENT[active_environment];
             var shortcut;
             var _shortcut;
@@ -650,4 +353,4 @@
     };
 
     return ShortcutUntangler;
-}));
+});
