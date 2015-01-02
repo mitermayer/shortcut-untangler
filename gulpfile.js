@@ -110,12 +110,7 @@ gulp.task('integration-test', ['build'], function() {
 });
 
 gulp.task('dev', function() {
-    gulp.src(allFiles)
-        .pipe(karma({
-            configFile: 'karma-integration.conf.js',
-            browsers: ['PhantomJS'],
-            action: 'watch'
-        }))
+    gulp.watch(allFiles, ['lint','integration-test']);
 });
 
 // used for testing
