@@ -115,7 +115,8 @@ lib_Utils = function () {
    *
    * @return {undefined}
    */
-  var addEvent = function () {
+  var addEvent = function (element, type, callback) {
+    element.addEventListener(type, callback, false);
   };
   /**
    * Checks to see if match is an array
@@ -581,10 +582,10 @@ main = function (Utils, Shortcut, Context, Environment) {
     // create a new environment
     this.createEnvironment({ 'name': active_environment });
     //  we need to make sure that we clear the keys once we no longer are focused on the rootelement
-    rootElement.addEventListener('blur', function () {
+    Utils.addEvent(rootElement, 'blur', function () {
       keyHandler.clear();
     });
-    rootElement.addEventListener('keyup', function (e) {
+    Utils.addEvent(rootElement, 'keyup', function (e) {
       var key = e.keyCode ? e.keyCode : e.which;
       var shortcutKey = typeof MODFIER_KEY_CODES[key] !== 'undefined' ? MODFIER_KEY_CODES[key].toUpperCase() : String.fromCharCode(key);
       for (var k = 0, len = KEY_MODIFIERS.length; k < len; k++) {
@@ -595,7 +596,7 @@ main = function (Utils, Shortcut, Context, Environment) {
       }
       keyHandler.keyUp(shortcutKey);
     }, false);
-    rootElement.addEventListener('keydown', function (e) {
+    Utils.addEvent(rootElement, 'keydown', function (e) {
       var key = e.keyCode ? e.keyCode : e.which;
       var shortcutKey = typeof Utils.MODFIER_KEY_CODES[key] !== 'undefined' ? Utils.MODFIER_KEY_CODES[key].toUpperCase() : String.fromCharCode(key);
       var activeEnvironment = CACHE.ENVIRONMENT[active_environment];

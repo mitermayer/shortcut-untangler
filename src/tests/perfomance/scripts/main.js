@@ -1,7 +1,7 @@
 require.config({
     paths: {
         latestStableRelease: 'https://rawgit.com/mitermayer/shortcut-untangler/master/src/js/shortcutUntangler',
-        developmentVersion: '../../../js/shortcutUntangler'
+        developmentVersion: '../../../../dist/shortcutUntangler'
     }
 });
 
@@ -56,15 +56,15 @@ define([
         }, 'foo' + i);
     }
 
-    JSLitmus.test('Latest Release', function() {
-      Utils.triggerNativeKeyHotkey(['A', 'S', 'D', 'F', 'O', 'P'], latestStableReleaseFixture);
-      while(Acalled !== true) {}
-      Acalled = false;
-    });
-
     JSLitmus.test('Development Version', function() {
       Utils.triggerNativeKeyHotkey(['B', 'C', 'N', 'M', 'G', 'H'], developmentVersionFixture);
       while(Bcalled !== true) {}
       Bcalled = false;
+    });
+
+    JSLitmus.test('Latest Release', function() {
+      Utils.triggerNativeKeyHotkey(['A', 'S', 'D', 'F', 'O', 'P'], latestStableReleaseFixture);
+      while(Acalled !== true) {}
+      Acalled = false;
     });
 });

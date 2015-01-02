@@ -83,8 +83,8 @@ define([], function(){
      *
      * @return {undefined}
      */
-    var addEvent = function() {
-        // TODO: add event listener function here
+    var addEvent = function(element, type, callback) {
+        element.addEventListener(type, callback, false);
     };
 
     /**
