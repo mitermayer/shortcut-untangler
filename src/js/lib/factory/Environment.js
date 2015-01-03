@@ -1,7 +1,7 @@
 /**
  * Creates Environment
  *
- * @return {EnvironmentFactory}
+ * @return {Environment}
  */
 define([
     'lib/Utils'
@@ -25,12 +25,9 @@ function(
         },
         create: function(option) {
             var environment = {
-                'context': [],
-                'name': option.name
-            };
-
-            Object.defineProperty(environment, 'toggleDisabledState', {
-                    value : function(state, context, shortcut) {
+                context: [],
+                name: option.name,
+                toggleDisabledState: function(state, context, shortcut) {
                         var ctx;
 
                         if (Utils.isArray(context)) { // disable context in array
@@ -55,11 +52,8 @@ function(
                                 ctx.toggleDisabledState(state, shortcut);
                             }
                         }
-                    },
-                    writable: false,
-                    enumerable: false,
-                    configurable: false
-            });
+                    }
+            };
 
             return environment;
         }

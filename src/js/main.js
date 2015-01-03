@@ -1,8 +1,8 @@
 define([
     'lib/Utils',
-    'lib/ShortcutFactory',
-    'lib/ContextFactory',
-    'lib/EnvironmentFactory'
+    'lib/factory/Shortcut',
+    'lib/factory/Context',
+    'lib/factory/Environment'
 ],
 function(
     Utils,

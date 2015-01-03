@@ -34,7 +34,7 @@ THE SOFTWARE.
  *
  * @return {Utils} general helpers
  */
-var lib_Utils, lib_ShortcutFactory, lib_ContextFactory, lib_EnvironmentFactory, main;
+var lib_Utils, lib_factory_Shortcut, lib_factory_Context, lib_factory_Environment, main;
 lib_Utils = function () {
   'use scrict';
   // not supporting meta at the moment
@@ -168,7 +168,7 @@ lib_Utils = function () {
     hasRequiredArguments: hasRequiredArguments
   };
 }();
-lib_ShortcutFactory = function (Utils) {
+lib_factory_Shortcut = function (Utils) {
   var Shortcut = {
     getKeyName: function (key) {
       if (Utils.isNumber(key)) {
@@ -196,30 +196,25 @@ lib_ShortcutFactory = function (Utils) {
     },
     create: function (option) {
       var shortcut = {
-        'key': option.key,
-        'description': option.description || 'Keyboard shortcut handler triggered by key: ' + option.key,
-        'name': option.name || 'Shortcut for: ' + option.key,
-        'callback': option.callback
-      };
-      Object.defineProperty(shortcut, 'toggleDisabledState', {
-        value: function (state) {
+        key: option.key,
+        description: option.description || 'Keyboard shortcut handler triggered by key: ' + option.key,
+        name: option.name || 'Shortcut for: ' + option.key,
+        callback: option.callback,
+        toggleDisabledState: function (state) {
           state = typeof state !== 'undefined' ? state : !this.disabled;
           if (state) {
             this.disabled = true;
           } else {
             delete this.disabled;
           }
-        },
-        writable: false,
-        enumerable: false,
-        configurable: false
-      });
+        }
+      };
       return shortcut;
     }
   };
   return Shortcut;
 }(lib_Utils);
-lib_ContextFactory = function (Utils) {
+lib_factory_Context = function (Utils) {
   /**
    * Check what is the index for context based on the context name
    *
@@ -255,12 +250,10 @@ lib_ContextFactory = function (Utils) {
     },
     create: function (option) {
       var context = {
-        'shortcut': {},
-        'name': option.name,
-        'weight': option.weight || 0
-      };
-      Object.defineProperty(context, 'toggleDisabledState', {
-        value: function (state, shortcut) {
+        shortcut: {},
+        name: option.name,
+        weight: option.weight || 0,
+        toggleDisabledState: function (state, shortcut) {
           var scut;
           if (Utils.isArray(shortcut)) {
             // disable context in array
@@ -282,17 +275,14 @@ lib_ContextFactory = function (Utils) {
               this.shortcut[scut].toggleDisabledState(state);
             }
           }
-        },
-        writable: false,
-        enumerable: false,
-        configurable: false
-      });
+        }
+      };
       return context;
     }
   };
   return Context;
 }(lib_Utils);
-lib_EnvironmentFactory = function (Utils) {
+lib_factory_Environment = function (Utils) {
   var Environment = {
     validate: function (option, environments) {
       if (environments[option.name]) {
@@ -305,11 +295,9 @@ lib_EnvironmentFactory = function (Utils) {
     },
     create: function (option) {
       var environment = {
-        'context': [],
-        'name': option.name
-      };
-      Object.defineProperty(environment, 'toggleDisabledState', {
-        value: function (state, context, shortcut) {
+        context: [],
+        name: option.name,
+        toggleDisabledState: function (state, context, shortcut) {
           var ctx;
           if (Utils.isArray(context)) {
             // disable context in array
@@ -334,11 +322,8 @@ lib_EnvironmentFactory = function (Utils) {
               ctx.toggleDisabledState(state, shortcut);
             }
           }
-        },
-        writable: false,
-        enumerable: false,
-        configurable: false
-      });
+        }
+      };
       return environment;
     }
   };
@@ -624,5 +609,5 @@ main = function (Utils, Shortcut, Context, Environment) {
     }, false);
   };
   return ShortcutUntangler;
-}(lib_Utils, lib_ShortcutFactory, lib_ContextFactory, lib_EnvironmentFactory);    return main;
+}(lib_Utils, lib_factory_Shortcut, lib_factory_Context, lib_factory_Environment);    return main;
 }));
