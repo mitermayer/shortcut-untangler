@@ -109,8 +109,22 @@ gulp.task('integration-test', ['build'], function() {
         });
 });
 
+gulp.task('integration-test-dev', ['build'], function() {
+    // Be sure to return the stream
+    gulp.src([DIST + SCRIPT_FILE].concat(testFiles))
+        .pipe(karma({
+            configFile: 'karma-integration.conf.js',
+            action: 'run'
+        }))
+        .on('error', function swallowError(error) {
+            // Make sure failed tests cause gulp to exit non-zero
+            console.log(error.toString());
+            this.emit('end');
+        });
+});
+
 gulp.task('dev', function() {
-    gulp.watch(allFiles, ['lint','integration-test']);
+    gulp.watch(allFiles, ['lint','integration-test-dev']);
 });
 
 // used for testing
