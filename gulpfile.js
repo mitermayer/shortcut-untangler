@@ -68,7 +68,6 @@ gulp.task('min', function() {
               prefixMode: 'standard'
               // some other options
             }))
-            .pipe(stripDebug())
             .pipe(uglify())
             .pipe(sourcemaps.write())
             .pipe(gulp.dest(DIST));

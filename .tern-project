@@ -4,6 +4,7 @@
         "./src/js/**/*.js"
     ],
     "plugins": {
+        "node": {},
         "requirejs": {
             "baseURL": "./src/js/",
             "paths": {}
