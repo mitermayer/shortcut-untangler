@@ -4,8 +4,8 @@
   <body>
   <h1>Press key 'E+F' and expect background color change to blue</h1>
   <h1>Press key 'ALT+G' and expect background color change to red</h1>
-  <script src="src/js/shortcutUntangler.js"></script>
-  <!--<script src="shortcutUntangler.min.js"></script>-->
+  <!--<script src="dist/shortcutUntangler.js"></script>-->
+  <script src="dist/shortcutUntangler.min.js"></script>
   <script>
       var body = document.querySelector("body"),
           bodyStyle = body.style,
@@ -17,7 +17,7 @@
         shortcutUntangler.createShortcut({
             name: 'My shortcut',
             description: 'My shortcut description',
-            key: 'e f',
+            key: 'e+f',
             callback: function(e, f) {
               if(bodyStyle.background !== "blue") {
                 bodyBackground = "blue";
@@ -31,7 +31,7 @@
         shortcutUntangler.createShortcut({
             name: 'My shortcut',
             description: 'My shortcut description',
-            key: 'alt g',
+            key: 'alt+g',
             callback: function(e, f) {
               if(bodyStyle.background !== "red") {
                 bodyBackground = "red";
