@@ -1,6 +1,6 @@
 require.config({
     paths: {
-        latestStableRelease: 'https://rawgit.com/mitermayer/shortcut-untangler/master/src/js/shortcutUntangler',
+        latestStableRelease: 'https://rawgit.com/mitermayer/shortcut-untangler/master/dist/shortcutUntangler',
         developmentVersion: '../../../../dist/shortcutUntangler'
     }
 });
