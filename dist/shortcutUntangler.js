@@ -46,6 +46,19 @@ lib_Utils = function () {
     element.addEventListener(type, callback, false);
   };
   /**
+   * Checks to see if object has defined all the required params
+   *
+   * @param {Array} required - list of required params to be checked
+   * @param {Object} option - object to be checked
+   * @return {Boolean}
+   */
+  var hasRequiredArguments = function (required, option) {
+    // TODO: rename this function to be called hasDefinedProperty
+    return required.every(function (key) {
+      return typeof option[key] !== 'undefined';
+    });
+  };
+  /**
    * Checks to see if match is an array
    *
    * @param {Object} match
@@ -73,24 +86,21 @@ lib_Utils = function () {
     return typeof match === 'string';
   };
   /**
-   * Checks to see if object has defined all the required params
+   * Checks to see if element is text-accepting element
    *
-   * @param {Array} required - list of required params to be checked
-   * @param {Object} option - object to be checked
+   * @param {htmlElement} element
    * @return {Boolean}
    */
-  var hasRequiredArguments = function (required, option) {
-    // TODO: rename this function to be called hasDefinedProperty
-    return required.every(function (key) {
-      return typeof option[key] !== 'undefined';
-    });
+  var isTextAcceptingElement = function (element) {
+    return /textarea|input|select/i.test(element.nodeName) || element.getAttribute('contentEditable');
   };
   return {
     addEvent: addEvent,
-    isString: isString,
+    hasRequiredArguments: hasRequiredArguments,
     isArray: isArray,
     isNumber: isNumber,
-    hasRequiredArguments: hasRequiredArguments
+    isString: isString,
+    isTextAcceptingElement: isTextAcceptingElement
   };
 }();
 lib_debug_Tools = function () {
@@ -275,14 +285,14 @@ lib_factory_Context = function (Utils) {
         if (Utils.isArray(shortcut)) {
           // disable context in array
           for (var i = 0, len = shortcut.length; i < len; i++) {
-            scut = this.shortcut[shortcut[i]];
+            scut = this.shortcut[shortcut[i].toUpperCase()];
             if (typeof scut !== 'undefined') {
               scut.toggleDisabledState(state);
             }
           }
         } else if (Utils.isString(shortcut)) {
           // disable a single context
-          scut = this.shortcut[shortcut];
+          scut = this.shortcut[shortcut.toUpperCase()];
           if (typeof scut !== 'undefined') {
             scut.toggleDisabledState(state);
           }
@@ -628,7 +638,7 @@ main = function (Utils, DebugTools, Keys, KeyboardManager, Shortcut, Context, En
       }
       shortcut = keyHandler.getKeys();
       _shortcut = activeEnvironment[shortcut];
-      if (_shortcut) {
+      if (_shortcut && (e.target === rootElement || !Utils.isTextAcceptingElement(e.target))) {
         e.preventDefault();
         e.stopPropagation();
         if (debug) {

@@ -237,7 +237,7 @@ define([
 
                 _shortcut = activeEnvironment[shortcut];
 
-                if (_shortcut) {
+                if (_shortcut && (e.target === rootElement || !Utils.isTextAcceptingElement(e.target))) {
                     e.preventDefault();
                     e.stopPropagation();
 
