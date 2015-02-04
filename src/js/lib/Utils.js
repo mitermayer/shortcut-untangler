@@ -16,6 +16,20 @@ define([], function(){
     };
 
     /**
+     * Checks to see if object has defined all the required params
+     *
+     * @param {Array} required - list of required params to be checked
+     * @param {Object} option - object to be checked
+     * @return {Boolean}
+     */
+    var hasRequiredArguments = function(required, option) {
+        // TODO: rename this function to be called hasDefinedProperty
+        return required.every(function(key) {
+            return typeof option[key] !== 'undefined';
+        });
+    };
+
+    /**
      * Checks to see if match is an array
      *
      * @param {Object} match
@@ -46,24 +60,21 @@ define([], function(){
     };
 
     /**
-     * Checks to see if object has defined all the required params
+     * Checks to see if element is text-accepting element
      *
-     * @param {Array} required - list of required params to be checked
-     * @param {Object} option - object to be checked
+     * @param {htmlElement} element
      * @return {Boolean}
      */
-    var hasRequiredArguments = function(required, option) {
-        // TODO: rename this function to be called hasDefinedProperty
-        return required.every(function(key) {
-            return typeof option[key] !== 'undefined';
-        });
+    var isTextAcceptingElement = function(element) {
+        return  /textarea|input|select/i.test(element.nodeName) || element.getAttribute('contentEditable');
     };
 
     return {
         addEvent: addEvent,
-        isString: isString,
+        hasRequiredArguments: hasRequiredArguments,
         isArray: isArray,
         isNumber: isNumber,
-        hasRequiredArguments: hasRequiredArguments
+        isString: isString,
+        isTextAcceptingElement: isTextAcceptingElement
     };
 });

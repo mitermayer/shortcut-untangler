@@ -21,14 +21,14 @@ define([
 
                     if (Utils.isArray(shortcut)) { // disable context in array
                         for (var i = 0, len = shortcut.length; i < len; i++) {
-                            scut = this.shortcut[shortcut[i]];
+                            scut = this.shortcut[shortcut[i].toUpperCase()];
 
                             if (typeof scut !== 'undefined') {
                                 scut.toggleDisabledState(state);
                             }
                         }
                     } else if (Utils.isString(shortcut)) { // disable a single context
-                        scut = this.shortcut[shortcut];
+                        scut = this.shortcut[shortcut.toUpperCase()];
 
                         if (typeof scut !== 'undefined') {
                             scut.toggleDisabledState(state);
