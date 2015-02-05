@@ -1,6 +1,7 @@
 var gulp = require('gulp');
 var del = require('del');
 var fs = require('fs');
+var packageJSON = require('./package.json');
 
 var amdclean  = require('gulp-amdclean');
 var concat = require('gulp-concat');
@@ -23,7 +24,7 @@ var MIN_FILE = 'shortcutUntangler.min.js';
 var SCRIPT_FILE= 'shortcutUntangler.js';
 
 gulp.task('build', function() {
-    var license = '/*\n' + fs.readFileSync('LICENSE', 'utf8') + '*/\n';
+    var license = '/*!\n\n' + 'version: ' + packageJSON.version + '\n\n\n' + fs.readFileSync('LICENSE', 'utf8') + '*/\n';
     var startFragment = fs.readFileSync('src/parts/umd.frag', 'utf8');
     var endFragment = fs.readFileSync('src/parts/umd-end.frag', 'utf8');
 
@@ -50,7 +51,7 @@ gulp.task('clean', function(cb) {
 
 // JS concat, strip debugging and minify
 gulp.task('min', function() {
-    var license = '/*\n' + fs.readFileSync('LICENSE', 'utf8') + '*/\n';
+    var license = '/*!\n\n' + 'version: ' + packageJSON.version + '\n\n\n' + fs.readFileSync('LICENSE', 'utf8') + '*/\n';
     var startFragment = fs.readFileSync('src/parts/umd.frag', 'utf8');
     var endFragment = fs.readFileSync('src/parts/umd-end.frag', 'utf8');
 
@@ -68,7 +69,9 @@ gulp.task('min', function() {
               prefixMode: 'standard'
               // some other options
             }))
-            .pipe(uglify())
+            .pipe(uglify({
+                preserveComments: "some"
+            }))
             .pipe(sourcemaps.write())
             .pipe(gulp.dest(DIST));
     });

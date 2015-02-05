@@ -1,4 +1,8 @@
-/*
+/*!
+
+version: 1.0.0
+
+
 The MIT License
 
 Copyright (c) 2014-2015 mitermayer reis
