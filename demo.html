@@ -4,8 +4,9 @@
   <body>
   <h1>Press key 'E+F' and expect background color change to blue</h1>
   <h1>Press key 'ALT+G' and expect background color change to red</h1>
-  <!--<script src="dist/shortcutUntangler.js"></script>-->
-  <script src="dist/shortcutUntangler.min.js"></script>
+  <h1>Press key '?' and expect background color change to green</h1>
+  <script src="dist/shortcutUntangler.js"></script>
+  <!--<script src="dist/shortcutUntangler.min.js"></script>-->
   <script>
       var body = document.querySelector("body"),
           bodyStyle = body.style,
@@ -35,6 +36,20 @@
             callback: function(e, f) {
               if(bodyStyle.background !== "red") {
                 bodyBackground = "red";
+              } else {
+                bodyBackground = "white";
+              }
+
+              bodyStyle.background = bodyBackground;
+            }
+        });
+        shortcutUntangler.createShortcut({
+            name: 'My shortcut for question mark',
+            description: 'My shortcut description for question mark',
+            key: '?',
+            callback: function(e, f) {
+              if(bodyStyle.background !== "green") {
+                bodyBackground = "green";
               } else {
                 bodyBackground = "white";
               }

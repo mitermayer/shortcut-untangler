@@ -192,44 +192,77 @@ lib_keyboard_Keys = function () {
     221: ']',
     222: '\''
   };
+  var KEY_WHEN_PRESSING_SHIFT = {
+    '\'': '"',
+    ',': '<',
+    '-': '_',
+    '.': '>',
+    '/': '?',
+    '0': ')',
+    '1': '!',
+    '2': '@',
+    '3': '#',
+    '4': '$',
+    '5': '%',
+    '6': '^',
+    '7': '&',
+    '8': '*',
+    '9': '(',
+    ';': ': ',
+    '=': '+',
+    '\\': '|',
+    '`': '~'
+  };
   return {
     KEY_MODIFIERS: KEY_MODIFIERS,
+    KEY_WHEN_PRESSING_SHIFT: KEY_WHEN_PRESSING_SHIFT,
     MODFIER_KEY_CODES: MODFIER_KEY_CODES
   };
 }();
-lib_keyboard_Manager = function () {
-  var pressedKeys = {};
-  /**
-   * converts all currently pressed keys into a single unique string
-   *
-   * @return {String}
-   */
-  this.getKeys = function () {
-    return Object.keys(pressedKeys).sort().join('+');
+lib_keyboard_Manager = function (Keys) {
+  var KEY_WHEN_PRESSING_SHIFT = Keys.KEY_WHEN_PRESSING_SHIFT;
+  return function () {
+    var pressedKeys = {};
+    /**
+     * converts all currently pressed keys into a single unique string
+     *
+     * @return {String}
+     */
+    this.getKeys = function () {
+      var keysPressedArray = Object.keys(pressedKeys);
+      var ret;
+      // we only consider a shift modief combo key if there were only 2 keys pressed, the modifier and the target key
+      if (typeof pressedKeys.SHIFT && keysPressedArray.length === 2) {
+        var nonShiftKeyIndex = keysPressedArray.indexOf('SHIFT') === 0 ? 1 : 0;
+        ret = KEY_WHEN_PRESSING_SHIFT[keysPressedArray[nonShiftKeyIndex]];
+      }
+      ret = ret || keysPressedArray.sort().join('+');
+      return ret;
+    };
+    /**
+     * register a currently pressed key
+     *
+     * @param {String} key - key pressed
+     */
+    this.keyDown = function (key) {
+      pressedKeys[key] = true;
+    };
+    /**
+     * removes pressed key
+     *
+     * @param key - key released
+     */
+    this.keyUp = function (key) {
+      delete pressedKeys[key];
+    };
+    /**
+     * clears all pressed keys
+     */
+    this.clear = function () {
+      pressedKeys = {};
+    };
   };
-  /**
-   * register a currently pressed key
-   *
-   * @param {String} key - key pressed
-   */
-  this.keyDown = function (key) {
-    pressedKeys[key] = true;
-  };
-  /**
-   * removes pressed key
-   *
-   * @param key - key released
-   */
-  this.keyUp = function (key) {
-    delete pressedKeys[key];
-  };
-  /**
-   * clears all pressed keys
-   */
-  this.clear = function () {
-    pressedKeys = {};
-  };
-};
+}(lib_keyboard_Keys);
 lib_factory_Shortcut = function (Utils, Keys) {
   var createShortcut = function (option) {
     var shortcut = {
