@@ -1,6 +1,6 @@
 {
   "name": "shortcut-untangler",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "keyboard shortcuts manager",
   "main": "src/js/shortcut-untangler.js",
   "scripts": {
