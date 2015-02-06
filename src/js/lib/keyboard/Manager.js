@@ -21,7 +21,7 @@ define([
             var ret;
 
             // we only consider a shift modief combo key if there were only 2 keys pressed, the modifier and the target key
-            if(typeof(pressedKeys.SHIFT) && keysPressedArray.length === 2) {
+            if(pressedKeys.SHIFT && keysPressedArray.length === 2) {
                 var nonShiftKeyIndex = keysPressedArray.indexOf("SHIFT") === 0 ? 1 : 0;
 
                 ret = KEY_WHEN_PRESSING_SHIFT[keysPressedArray[nonShiftKeyIndex]];
