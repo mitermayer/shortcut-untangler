@@ -1,13 +1,17 @@
 {
-    "libs": ["browser","ecma5"],
+    "libs": ["browser", "ecma5", "ecma6"],
     "loadEagerly": [
         "./src/js/**/*.js"
+    ],
+    "dontload": [
+        "public/",
+        "node_modules/",
+        "dist"
     ],
     "plugins": {
         "node": {},
         "requirejs": {
-            "baseURL": "./src/js/",
-            "paths": {}
+           "baseURL": "./src/js/"
         }
     }
 }
